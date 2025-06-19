@@ -10,7 +10,7 @@ function validate(schema) {
             const { error } = headers.validate(req.headers);
             if (error) {
                 console.log(error)
-                if (error) return next(new responseError(400, { "message": "Validation error", error }));
+                if (error) return next(new responseError(400, "JOI Validation Error"));
             }
         }
 
@@ -18,7 +18,7 @@ function validate(schema) {
             const { error } = params.validate(req.params);
             if (error) {
                 console.log(error)
-                if (error) return next(new responseError(400, { "message": "Validation error", error }));
+                if (error) return next(new responseError(400, "JOI Validation Error"));
             }
         }
 
@@ -26,16 +26,16 @@ function validate(schema) {
             const { error } = query.validate(req.query);
             if (error) {
                 console.log(error)
-                if (error) return next(new responseError(400, { "message": "Validation error", error }));
+                if (error) return next(new responseError(400, "JOI Validation Error"));
             }
         }
 
         if (body) {
-            if (req.headers["content-type"] !== "application/json") return next(new responseError(400, { "message": "Validation error", error }));
+            if (req.headers["content-type"] !== "application/json") return next(new responseError(400, { "message": "Validation error", "error": "Request body must be a JSON object" }));
             const { error } = body.validate(req.body);
             if (error) {
                 console.log(error)
-                if (error) return next(new responseError(400, { "message": "Validation error", error }));
+                if (error) return next(new responseError(400, "JOI Validation Error"));
             }
         }
 

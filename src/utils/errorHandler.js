@@ -5,8 +5,9 @@ const asyncHandler = (fn) => {
 }
 
 class responseError extends Error {
-    constructor(statusCode, message) {
+    constructor(statusCode, message, error) {
         super(message);
+        this.error = error;
         this.statusCode = statusCode || 500;
         this.status = `${statusCode}`.startsWith("4") ? "Fail" : "Error";
     }

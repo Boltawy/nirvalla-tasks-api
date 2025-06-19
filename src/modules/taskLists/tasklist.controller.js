@@ -1,15 +1,16 @@
-import taskListService from "./tasks.service.js";
+import taskListService from "./tasklist.service.js";
 import { asyncHandler } from "../../utils/errorHandler.js";
 import successHandler from "../../utils/successHandler.js";
 
 const taskListController = {
     getTaskLists: asyncHandler(async (req, res) => {
-        const taskLists = await taskListService.getTaskLists();
-        return successHandler(res, { message: "Task lists fetched successfully", taskLists })
+        const taskLists = await taskListService.getTaskLists(req);
+        return successHandler(res, taskLists)
     }),
+
     createTaskList: asyncHandler(async (req, res) => {
-        const createdTaskList = await taskListService.createTaskList(req.body);
-        return successHandler(res, { message: "Task list created successfully", createdTaskList })
+        const createdTaskList = await taskListService.createTaskList(req);
+        return successHandler(res, createdTaskList)
     }),
     // getTaskListById: asyncHandler(async (req, res) => {
     //     const taskList = await taskListService.getTaskListById(req.params.id);

@@ -29,4 +29,14 @@ const loginSchema = {
     })
 };
 
-export {loginSchema, signupSchema};
+const taskListSchema = {
+    body: Joi.object({
+        title: Joi.string()
+            .max(40)
+            .required(),
+        description: Joi.string()
+            .max(200)
+    })
+}
+
+export { loginSchema, signupSchema, taskListSchema };

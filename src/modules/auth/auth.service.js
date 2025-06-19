@@ -20,7 +20,7 @@ const authService = {
             let hashedPassword = await bcrypt.hash(password, 8)
             await User.insertOne({ userName, email, password: hashedPassword }, { validateBeforeSave: true })
         } catch (error) {
-            console.log(error)
+        console.log(error)
             if (error.message.includes("validation failed")) {
                 throw new responseError(400, "Validation Error")
             }

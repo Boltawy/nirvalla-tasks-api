@@ -6,5 +6,5 @@ const taskListSchema = new Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
 }, { timestamps: true })
 
-const TaskList = mongoose.models.TaskList || model("TaskList", taskListSchema)
-export default TaskList 
+const tasklistModel = mongoose.models.TaskList || model("TaskList", taskListSchema)
+export default tasklistModel 

@@ -17,6 +17,7 @@ const authController = {
             return res.status(500).json({ message: "Error creating user" })
         }
     },
+    
     login: async (req, res) => {
         try {
             let { email, password } = req.body;

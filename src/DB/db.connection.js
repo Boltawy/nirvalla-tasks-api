@@ -1,17 +1,10 @@
-import { MongoClient } from "mongodb";
-import { configDotenv } from 'dotenv';
-configDotenv({ path: './config.env' });
+import mongoose from "mongoose";
 
-const client = new MongoClient(process.env.DBURL);
-const db = client.db(process.env.DBNAME);
 
-const establishDBConnection = async () => {
-  try {
-    await client.connect();
-    console.log("Connected to DB.");
-  } catch (error) {
-    console.error("Error connecting to DB:", error);
-  }
-};
+const establishDBConnection = () => {
+    mongoose.connect(`${process.env.DBURL}/${process.env.DBNAME}`)
+        .then(() => console.log("Connected to DB"))
+        .catch((err) => console.error("Error connecting to DB"));
+}
 
-export { db, establishDBConnection };
+export default establishDBConnection;

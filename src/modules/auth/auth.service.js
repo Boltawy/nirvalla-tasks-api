@@ -1,4 +1,3 @@
-import { db } from "../../DB/db.connection.js";
 import usersModel from "../../models/user.model.js";
 
 const authService = {

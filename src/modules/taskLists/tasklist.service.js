@@ -13,10 +13,9 @@ const taskListService = {
         return taskLists
     },
     createTaskList: async ({ body: taskList, userId }) => {
-        console.log(taskList, userId) // TODO merge tasklist with it's user
+        taskList.userId = userId
         let createdTaskList;
         try {
-            console.log(taskList)
             createdTaskList = await TaskList.create(taskList);
         } catch (error) {
             throw new responseError(520, "Unknown error occured", error)

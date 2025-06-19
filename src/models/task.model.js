@@ -9,9 +9,6 @@ const taskSchema = new Schema({
     // status: { type: String, default: "pending", enum: ["not-started", "pending", "in-progress", "completed"] },
     // priority: { type: String, default: "low", enum: ["none", "low", "medium", "high", "urgent"] },
     // sortOrder: { type: Number, default: 0 },
-
-
-
 }, { timestamps: true })
 
 const Task = mongoose.models.Task || model("Task", taskSchema)

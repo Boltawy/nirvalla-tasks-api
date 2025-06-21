@@ -11,10 +11,10 @@ const taskListRouter = Router();
 taskListRouter.route('/')
     .get(authenticate, taskListController.getTaskLists)
     .post(authenticate, validate(taskListSchema), taskListController.createTaskList)
-// taskListRouter.route('/:id')
-//     .get(authenticate, taskListController.getTaskListById)
-//     .patch(authenticate, taskListController.updateTaskListById)
-//     .delete(authenticate, taskListController.deleteTaskListById);
+taskListRouter.route('/:id')
+    .get(authenticate, taskListController.getTaskListById)
+    .patch(authenticate, taskListController.updateTaskListById)
+    .delete(authenticate, taskListController.deleteTaskListById);
 // taskListRouter.route('/:id/tasks')
 //     .post(authenticate, taskListController.createTaskByTaskListId)
 //     .get(authenticate, taskListController.getTasksByTaskListId)

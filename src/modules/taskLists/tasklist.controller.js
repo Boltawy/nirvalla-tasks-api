@@ -4,26 +4,35 @@ import successHandler from "../../utils/successHandler.js";
 
 const taskListController = {
     getTaskLists: asyncHandler(async (req, res) => {
-        const taskLists = await taskListService.getTaskLists(req);
+        const { userId } = req;
+        const taskLists = await taskListService.getTaskLists(userId);
         return successHandler(res, taskLists)
     }),
 
     createTaskList: asyncHandler(async (req, res) => {
-        const createdTaskList = await taskListService.createTaskList(req);
+        const { userId, body: taskList } = req;
+        const createdTaskList = await taskListService.createTaskList(userId, taskList);
         return successHandler(res, createdTaskList)
     }),
-    // getTaskListById: asyncHandler(async (req, res) => {
-    //     const taskList = await taskListService.getTaskListById(req.params.id);
-    //     return successHandler(res, { message: "Task list fetched successfully", taskList })
-    // }),
-    // updateTaskListById: asyncHandler(async (req, res) => {
-    //     await taskListService.updateTaskListById(req.params.id, req.body);
-    //     return successHandler(res, { message: "Task list updated successfully" })
-    // }),
-    // deleteTaskListById: asyncHandler(async (req, res) => {
-    //     await taskListService.deleteTaskListById(req.params.id);
-    //     return successHandler(res, { message: "Task list deleted successfully" })
-    // }),
+
+    getTaskListById: asyncHandler(async (req, res) => {
+        const { userId, params: { id: taskListId } } = req;
+        const taskList = await taskListService.getTaskListById(userId, taskListId);
+        return successHandler(res, { message: "Task list fetched successfully", taskList })
+    }),
+
+    updateTaskListById: asyncHandler(async (req, res) => {
+        const { userId, params: { id: taskListId }, body: taskList } = req;
+        await taskListService.updateTaskListById(userId, taskListId, taskList);
+        return successHandler(res, { message: "Task list updated successfully" })
+    }),
+    
+    deleteTaskListById: asyncHandler(async (req, res) => {
+        const { userId, params: { id: taskListId } } = req;
+        await taskListService.deleteTaskListById(userId, taskListId);
+        return successHandler(res, { message: "Task list deleted successfully" })
+    }),
+    
     // createTaskByTaskListId: asyncHandler(async (req, res) => {
     //     const createdTask = await taskListService.createTaskByTaskListId(req.params.id, req.body);
     //     return successHandler(res, { message: "Task created successfully", createdTask })

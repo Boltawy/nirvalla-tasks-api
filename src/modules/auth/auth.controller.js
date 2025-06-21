@@ -4,11 +4,13 @@ import successHandler from "../../utils/successHandler.js";
 
 const authController = {
     signUp: asyncHandler(async (req, res) => {
-        await authService.signUp(req.body);
+        const { userName, email, password } = req.body;
+        await authService.signUp(userName, email, password);
         return successHandler(res, { message: "User created successfully" })
     }),
     login: asyncHandler(async (req, res) => {
-        const loginData = await authService.login(req.body);
+        const { email: loginEmail, password: loginPassword } = req.body;
+        const loginData = await authService.login(loginEmail, loginPassword);
         return successHandler(res, { message: "Login successful", ...loginData })
     }),
 }

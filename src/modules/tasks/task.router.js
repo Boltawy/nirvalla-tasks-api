@@ -1,12 +1,18 @@
-import { Router } from 'express'
-import authController from './task.controller.js';
-import { validate } from '../../middleware/validation.middleware.js';
-import { signupSchema, loginSchema } from '../../middleware/validationSchemas.js';
+import { authenticate } from "../../middleware/auth.middleware.js";
+import { taskSchema } from "../../middleware/validationSchemas.js";
+import taskController from "./task.controller.js";
+
+const taskRouter = Router();
+
+taskRouter.route('/')
+    .get(authenticate, taskController.getTasks)
+    .post(authenticate, validate(taskSchema), taskController.createTask);
+
+taskRouter.route('/:taskId')
+    .get(authenticate, taskController.getTaskById)
+    .put(authenticate, validate(taskSchema), taskController.updateTaskById)
+    .delete(authenticate, taskController.deleteTaskById)
+    .patch(authenticate, taskController.toggleTaskStatusById);
 
 
-const authRouter = Router();
-
-authRouter.route('/signup').post(validate(signupSchema), authController.signUp);
-authRouter.route('/login').post(validate(loginSchema), authController.login);
-
-export default authRouter
+export default taskRouter

@@ -1,23 +1,27 @@
 import mongoose, { mongo } from "mongoose";
 import userModel from "../models/user.model.js";
 import { responseError } from "./errorHandler.js";
+//TODO Options object for all functions
 
 /**
  * Safely performs a findOne operation on a Mongoose model.
  * @param {mongoose.Model} model - The Mongoose model to perform the operation on.
- * @param {Object} data - The data to query the model with.
- * @param {string} [errMessage="Error reading from database"] - The error message to use if the operation fails.
+ * @param {Object} data - The query data to find the document with.
+ * @param {Object} [options] - Options for the operation.
+ * @param {string} [options.errMessage] - The error message to use if the operation fails.
+ * @param {boolean} [options.errOnNotFound=false] - Whether to throw an error if no document is found.
  * @returns {Promise<mongoose.Document>} The result of the operation.
  * @throws {responseError} If the operation fails.
  */
-export const safeFindOne = async (model, data, errMessage) => {
+export const safeFindOne = async (model, data, options = {}) => {
+    const { errMessage, errOnNotFound = true } = options;
     const { modelName } = model;
     try {
         const result = await model.findOne(data);
-        if (!result) throw new responseError(404, `${modelName} not found`);
+        if (!result && errOnNotFound) throw new responseError(404, `${modelName} not found`);
         return result;
     } catch (error) {
-        throw new responseError(500, `Error reading ${modelName} from database` || errMessage, error);
+        throw new responseError(500, errMessage || `Error reading ${modelName} from database`, error);
     }
 };
 
@@ -40,7 +44,7 @@ export const safeFindById = async (model, id, errMessage) => {
         return result;
     } catch (error) {
         if (!result) throw new responseError(404, `${modelName} not found`);
-        else throw new responseError(500, `Error reading ${modelName} from database` || errMessage, error);
+        else throw new responseError(500, errMessage || `Error reading ${modelName} from database`, error);
     }
 };
 
@@ -59,7 +63,7 @@ export const safeFind = async (model, data, errMessage) => {
         if (!result.length) throw new responseError(404, `${modelName} not found`);
         return result;
     } catch (error) {
-        throw new responseError(500, `Error reading ${modelName} from database` || errMessage, error);
+        throw new responseError(500, errMessage || `Error reading ${modelName} from database`, error);
     }
 };
 

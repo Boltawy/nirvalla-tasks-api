@@ -44,7 +44,6 @@ const taskListController = {
         const tasks = await taskListService.getTasksByTaskListId(userId, taskListId);
         return successHandler(res, { message: "Tasks fetched successfully", tasks })
     }),
-
 }
 
 export default taskListController;

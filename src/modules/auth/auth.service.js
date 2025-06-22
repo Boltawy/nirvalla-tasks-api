@@ -40,7 +40,7 @@ const authService = {
         }
 
         const accessToken = jwt.sign(tokenPayload, process.env.JWT_ACCESS_SECRET,
-            { expiresIn: "1h" }
+            { expiresIn: "365d" } //PROD: 1h
         )
         const refreshToken = jwt.sign(tokenPayload, process.env.JWT_REFRESH_SECRET,
             { expiresIn: "365d" }

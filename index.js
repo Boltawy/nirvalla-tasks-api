@@ -4,6 +4,7 @@ import establishDBConnection from "./src/DB/db.connection.js"
 import express from 'express'
 import authRouter from './src/modules/auth/auth.router.js'
 import taskListRouter from './src/modules/taskLists/tasklist.router.js'
+import taskRouter from './src/modules/tasks/task.router.js'
 // import usersRouter from './src/modules/users/users.router.js'
 
 
@@ -14,7 +15,7 @@ app.use(express.json())
 
 app.use("/api/v1/auth", authRouter)
 app.use("/api/v1/tasklists", taskListRouter)
-// app.use("/tasks", tasksRouter)
+app.use("/api/v1/tasks", taskRouter)
 
 app.use((err, req, res, next) => { //global error handler
     res.status(err.statusCode || 500).json({

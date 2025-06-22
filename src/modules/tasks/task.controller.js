@@ -11,7 +11,7 @@ const taskController = {
 
     createTask: asyncHandler(async (req, res) => {
         const { userId, body: newTask } = req;
-        const createdTask = await taskService.createTask(userId, newTask, taskListId);
+        const createdTask = await taskService.createTask(userId, newTask);
         return successHandler(res, { message: "Task created successfully", createdTask })
     }),
 

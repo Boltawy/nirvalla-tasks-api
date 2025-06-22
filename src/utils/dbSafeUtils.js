@@ -42,7 +42,6 @@ export const safeFindById = async (model, id, errMessage) => {
     try {
         result = await model.findById(id);
         if (!result) throw new Error();
-        console.log(result)
         return result;
     } catch (error) {
         if (!result) throw new responseError(404, `${modelName} not found`);
@@ -50,22 +49,28 @@ export const safeFindById = async (model, id, errMessage) => {
     }
 };
 
+
 /**
  * Safely performs a find operation on a Mongoose model.
  * @param {mongoose.Model} model - The Mongoose model to perform the operation on.
- * @param {Object} data - The data to query the model with.
- * @param {string} [errMessage="Error reading from database"] - The error message to use if the operation fails.
+ * @param {Object} data - The query filter to find the documents by.
+ * @param {Object} [options] - Options for the operation.
+ * @param {string} [options.errMessage] - The error message to use if the operation fails.
  * @returns {Promise<mongoose.Document[]>} The result of the operation.
- * @throws {responseError} If the operation fails.
+ * @throws {responseError} If the operation fails or no documents are found.
  */
-export const safeFind = async (model, data, errMessage) => {
+
+export const safeFind = async (model, data, options = {}) => {
+    const { errMessage } = options;
     const { modelName } = model;
+    let result;
     try {
-        const result = await model.find(data);
-        if (!result.length) throw new responseError(404, `${modelName} not found`);
+        result = await model.find(data);
+        if (!result.length) throw new Error();
         return result;
     } catch (error) {
-        throw new responseError(500, errMessage || `Error reading ${modelName} from database`, error);
+        if (!result.length) throw new responseError(404, `No ${modelName}s found`);
+        throw new responseError(500, errMessage || `Error reading ${modelName}s from database`, error);
     }
 };
 

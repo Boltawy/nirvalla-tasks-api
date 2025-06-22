@@ -1,6 +1,8 @@
+import { Router } from "express";
 import { authenticate } from "../../middleware/auth.middleware.js";
 import { taskSchema } from "../../middleware/validationSchemas.js";
 import taskController from "./task.controller.js";
+import { validate } from "../../middleware/validation.middleware.js";
 
 const taskRouter = Router();
 

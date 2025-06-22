@@ -3,9 +3,9 @@ import { responseError } from "../utils/errorHandler.js";
 
 const authenticate = (req, res, next) => {
     const { authorization } = req.headers;
-    if (!authorization) throw new responseError(401, "Unauthorized");
+    if (!authorization) throw new responseError(401, "Unauthenticated/Invalid Token");
     const [bearer, token] = authorization.split(" ");
-    if (bearer !== "Bearer") throw new responseError(401, "Unauthorized");
+    if (bearer !== "Bearer") throw new responseError(401, "Unauthenticated/Invalid Token");
 
     let _id;
     try {
@@ -14,7 +14,7 @@ const authenticate = (req, res, next) => {
             throw new responseError(401, "Token expired");
         }
     } catch (error) {
-        throw new responseError(401, "Unauthorized");
+        throw new responseError(401, "Unauthenticated/Invalid Token");
     }
     req.userId = _id;
     next();

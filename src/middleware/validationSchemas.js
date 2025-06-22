@@ -1,6 +1,6 @@
 import Joi from "joi";
 
-const signupSchema = {
+export const signupSchema = {
     body: Joi.object({
         userName: Joi.string()
             .alphanum()
@@ -19,7 +19,7 @@ const signupSchema = {
     })
 };
 
-const loginSchema = {
+export const loginSchema = {
     body: Joi.object({
         email: Joi.string()
             .email()
@@ -29,7 +29,7 @@ const loginSchema = {
     })
 };
 
-const taskListSchema = {
+export const taskListSchema = {
     body: Joi.object({
         title: Joi.string()
             .max(40)
@@ -39,4 +39,12 @@ const taskListSchema = {
     })
 }
 
-export { loginSchema, signupSchema, taskListSchema };
+export const taskSchema = {
+    body: Joi.object({
+        title: Joi.string()
+            .max(40)
+            .required(),
+        description: Joi.string()
+            .max(200),
+    })
+}

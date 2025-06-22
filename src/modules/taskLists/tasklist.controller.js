@@ -33,10 +33,18 @@ const taskListController = {
         return successHandler(res, { message: "Task list deleted successfully" })
     }),
 
-    // createTaskByTaskListId: asyncHandler(async (req, res) => {
-    //     const createdTask = await taskListService.createTaskByTaskListId(req.params.id, req.body);
-    //     return successHandler(res, { message: "Task created successfully", createdTask })
-    // }),
+    createTaskByTaskListId: asyncHandler(async (req, res) => {
+        const { userId, params: { taskListId }, body: newTask } = req;
+        const createdTask = await taskListService.createTaskByTaskListId(userId, taskListId, newTask);
+        return successHandler(res, { message: "Task created successfully", createdTask })
+    }),
+
+    getTasksByTaskListId: asyncHandler(async (req, res) => {
+        const { userId, params: { taskListId } } = req;
+        const tasks = await taskListService.getTasksByTaskListId(userId, taskListId);
+        return successHandler(res, { message: "Tasks fetched successfully", tasks })
+    }),
+
 }
 
 export default taskListController;

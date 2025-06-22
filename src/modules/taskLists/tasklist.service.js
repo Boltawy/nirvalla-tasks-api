@@ -21,18 +21,18 @@ const taskListService = {
     },
     getTaskListById: async (userId, taskListId) => {
         const taskList = await safeFindById(tasklistModel, taskListId);
-        if (taskList.userId != userId) throw new responseError(403, "Forbidden");
+        if (taskList.userId != userId) throw new responseError(403, "Forbidden/Unauthorized: You don't have access to that resource");
         return taskList
     },
     updateTaskListById: async (userId, taskListId, newTaskList) => {
         const taskList = await safeUpdateById(tasklistModel, taskListId, newTaskList);
         console.log(taskList)
-        if (taskList.userId != userId) throw new responseError(403, "Forbidden");
+        if (taskList.userId != userId) throw new responseError(403, "Forbidden/Unauthorized: You don't have access to that resource");
         return taskList
     },
     deleteTaskListById: async (userId, taskListId) => {
         const taskList = await safeFindById(tasklistModel, taskListId);
-        if (taskList.userId != userId) throw new responseError(403, "Forbidden");
+        if (taskList.userId != userId) throw new responseError(403, "Forbidden/Unauthorized: You don't have access to that resource");
         await safeDeleteById(tasklistModel, taskListId);
     },
 

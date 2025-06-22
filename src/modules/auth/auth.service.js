@@ -3,6 +3,7 @@ import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import { responseError } from "../../utils/errorHandler.js";
 import { safeCreate, safeFindOne } from "../../utils/dbSafeUtils.js";
+import tasklistModel from "../../models/tasklist.model.js";
 
 
 const authService = {
@@ -10,7 +11,8 @@ const authService = {
         const user = await safeFindOne(userModel, { email }, { errOnNotFound: false })
         if (user) throw new responseError(409, "User already exists")
         const hashedPassword = await bcrypt.hash(password, 8)
-        await safeCreate(userModel, { userName, email, password: hashedPassword })
+        const { _id: userId } = await safeCreate(userModel, { userName, email, password: hashedPassword }) //TODO: Atomic transaction: creating user and tasklist together or they both fail
+        await safeCreate(tasklistModel, { userId, title: "Inbox", isDefault: true })
     },
 
     login: async (loginEmail, loginPassword) => {

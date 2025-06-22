@@ -28,14 +28,15 @@ const taskListService = {
     },
     updateTaskListById: async (userId, taskListId, newTaskList) => {
         const taskList = await safeFindById(tasklistModel, taskListId);
+        if (taskList.isDefault == true) throw new responseError(403, `The default 'Inbox' tasklist can't be modified`)
         if (taskList.userId != userId) throw new responseError(403, "Unauthorized: You don't have access to that resource");
         const updatedTasklist = await safeUpdateById(tasklistModel, taskListId, newTaskList);
         return updatedTasklist;
     },
     deleteTaskListById: async (userId, taskListId) => {
         const taskList = await safeFindById(tasklistModel, taskListId);
+        if (taskList.isDefault == true) throw new responseError(403, `The default 'Inbox' tasklist can't be modified`)
         if (taskList.userId != userId) throw new responseError(403, "Unauthorized: You don't have access to that resource");
-        // await safeDelete(tasklistModel, { _id: taskListId });
         await safeDeleteById(tasklistModel, taskListId);
     },
 

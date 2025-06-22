@@ -6,21 +6,23 @@ import { responseError } from "./errorHandler.js";
 /**
  * Safely performs a findOne operation on a Mongoose model.
  * @param {mongoose.Model} model - The Mongoose model to perform the operation on.
- * @param {Object} data - The query data to find the document with.
+ * @param {Object} filter - The query filter to find the document by.
  * @param {Object} [options] - Options for the operation.
  * @param {string} [options.errMessage] - The error message to use if the operation fails.
  * @param {boolean} [options.errOnNotFound=false] - Whether to throw an error if no document is found.
  * @returns {Promise<mongoose.Document>} The result of the operation.
  * @throws {responseError} If the operation fails.
  */
-export const safeFindOne = async (model, data, options = {}) => {
+export const safeFindOne = async (model, filter, options = {}) => {
     const { errMessage, errOnNotFound = true } = options;
     const { modelName } = model;
+    let result;
     try {
-        const result = await model.findOne(data);
-        if (!result && errOnNotFound) throw new responseError(404, `${modelName} not found`);
+        result = await model.findOne(filter);
+        if (!result && errOnNotFound) throw new Error();
         return result;
     } catch (error) {
+        if (!result && errOnNotFound) throw new responseError(404, `${modelName} not found`);
         throw new responseError(500, errMessage || `Error reading ${modelName} from database`, error);
     }
 };

@@ -12,15 +12,12 @@ const app = express()
 establishDBConnection()
 app.use(express.json())
 
-
-
-
 app.use("/api/v1/auth", authRouter)
 app.use("/api/v1/tasklists", taskListRouter)
 // app.use("/tasks", tasksRouter)
 
 app.use((err, req, res, next) => { //global error handler
-    res.status(500).json({
+    res.status(err.statusCode).json({
         "status": err.status,
         "message": err.message,
         "error": err.error

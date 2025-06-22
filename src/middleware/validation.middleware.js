@@ -31,7 +31,7 @@ function validate(schema) {
         }
 
         if (body) {
-            if (req.headers["content-type"] !== "application/json") return next(new responseError(400, { "message": "Validation error", "error": "Request body must be a JSON object" }));
+            if (req.headers["content-type"] !== "application/json") return next(new responseError(400, "Validation error: body must be a JSON object"));
             const { error } = body.validate(req.body);
             if (error) {
                 console.log(error)

@@ -16,23 +16,23 @@ const taskListController = {
     }),
 
     getTaskListById: asyncHandler(async (req, res) => {
-        const { userId, params: { id: taskListId } } = req;
+        const { userId, params: { taskListId } } = req;
         const taskList = await taskListService.getTaskListById(userId, taskListId);
         return successHandler(res, { message: "Task list fetched successfully", taskList })
     }),
 
     updateTaskListById: asyncHandler(async (req, res) => {
-        const { userId, params: { id: taskListId }, body: taskList } = req;
+        const { userId, params: { taskListId }, body: taskList } = req;
         await taskListService.updateTaskListById(userId, taskListId, taskList);
-        return successHandler(res, { message: "Task list updated successfully" })
+        return successHandler(res, { message: "Task list updated successfully", taskList })
     }),
-    
+
     deleteTaskListById: asyncHandler(async (req, res) => {
-        const { userId, params: { id: taskListId } } = req;
+        const { userId, params: { taskListId } } = req;
         await taskListService.deleteTaskListById(userId, taskListId);
         return successHandler(res, { message: "Task list deleted successfully" })
     }),
-    
+
     // createTaskByTaskListId: asyncHandler(async (req, res) => {
     //     const createdTask = await taskListService.createTaskByTaskListId(req.params.id, req.body);
     //     return successHandler(res, { message: "Task created successfully", createdTask })

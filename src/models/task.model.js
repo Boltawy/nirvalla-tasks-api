@@ -11,5 +11,5 @@ const taskSchema = new Schema({
     // sortOrder: { type: Number, default: 0 },
 }, { timestamps: true })
 
-const Task = mongoose.models.Task || model("Task", taskSchema)
-export default Task 
+const taskModel = mongoose.models.Task || model("Task", taskSchema)
+export default taskModel 

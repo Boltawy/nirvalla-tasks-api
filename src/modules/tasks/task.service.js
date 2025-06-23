@@ -24,27 +24,29 @@ const taskService = {
     
     
     */
-    createTask: async (userId, newTask) => { //* Bloated logic
+    createTask: async (userId, newTask) => {
         newTask.userId = userId;
         let fetchedTaskList
         const { taskListId, taskListTitle } = newTask;
+
         if (taskListId) {
             fetchedTaskList = await safeFindById(taskListModel, taskListId);
             if (fetchedTaskList.userId != userId) throw new responseError(403, "Unauthorized: You don't have access to that resource");
+            return await safeCreate(taskModel, newTask);
         }
-        else if (!taskListId && taskListTitle) {
+
+        if (taskListTitle) {
             fetchedTaskList = await safeFindOne(taskListModel, { title: taskListTitle, userId }, { errOnNotFound: false });
             if (!fetchedTaskList) {
                 fetchedTaskList = await safeCreate(taskListModel, { title: taskListTitle, userId });
             }
-        } else if (!taskListId && !taskListTitle) {
-            fetchedTaskList = await safeFindOne(taskListModel, { userId, isDefault: true });
-        } else throw new responseError(500, "Unhandled error")
+            newTask.taskListId = fetchedTaskList._id;
+            return await safeCreate(taskModel, newTask);
+        }
 
-        const { _id: fetchedTaskListId } = fetchedTaskList;
-        newTask.taskListId = fetchedTaskListId;
-        const createdTask = await safeCreate(taskModel, newTask);
-        return createdTask
+        fetchedTaskList = await safeFindOne(taskListModel, { userId, isDefault: true });
+        newTask.taskListId = fetchedTaskList._id;
+        return await safeCreate(taskModel, newTask);
     },
 
     getTaskById: async (userId, taskId) => {

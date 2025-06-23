@@ -46,5 +46,7 @@ export const taskSchema = {
             .required(),
         description: Joi.string()
             .max(200),
+        taskListId: Joi.string(),
+        taskListTitle: Joi.string()
     })
 }

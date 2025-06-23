@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import taskListController from './tasklist.controller.js';
+import taskListController from './taskList.controller.js';
 import { validate } from '../../middleware/validation.middleware.js';
 import { authenticate } from '../../middleware/auth.middleware.js';
 import { taskListSchema, taskSchema } from '../../middleware/validationSchemas.js';

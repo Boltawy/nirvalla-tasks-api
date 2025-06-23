@@ -3,22 +3,24 @@ import userModel from "../models/user.model.js";
 import { responseError } from "./errorHandler.js";
 //TODO Options object for all functions
 
+
 /**
  * Safely performs a findOne operation on a Mongoose model.
  * @param {mongoose.Model} model - The Mongoose model to perform the operation on.
- * @param {Object} filter - The query filter to find the document by.
+ * @param {Object} filter - The filter to apply to find the document.
  * @param {Object} [options] - Options for the operation.
  * @param {string} [options.errMessage] - The error message to use if the operation fails.
  * @param {boolean} [options.errOnNotFound=false] - Whether to throw an error if no document is found.
+ * @param {Object} [options.projection] - The projection to apply to the found document.
  * @returns {Promise<mongoose.Document>} The result of the operation.
  * @throws {responseError} If the operation fails.
  */
 export const safeFindOne = async (model, filter, options = {}) => {
-    const { errMessage, errOnNotFound = true } = options;
+    const { errMessage, errOnNotFound = true, projection } = options;
     const { modelName } = model;
     let result;
     try {
-        result = await model.findOne(filter);
+        result = await model.findOne(filter, projection);
         if (!result && errOnNotFound) throw new Error();
         return result;
     } catch (error) {
@@ -27,49 +29,55 @@ export const safeFindOne = async (model, filter, options = {}) => {
     }
 };
 
+
 /**
  * Safely performs a findById operation on a Mongoose model.
  * @param {mongoose.Model} model - The Mongoose model to perform the operation on.
- * @param {string} id - The id of the document to query for.
- * @param {string} [errMessage="Error reading from database"] - The error message to use if the operation fails.
+ * @param {string} id - The id of the document to find.
+ * @param {Object} [options] - Options for the operation.
+ * @param {string} [options.errMessage] - The error message to use if the operation fails.
+ * @param {boolean} [options.errOnNotFound=false] - Whether to throw an error if no document is found.
+ * @param {Object} [options.projection] - The projection to apply to the found document.
  * @returns {Promise<mongoose.Document>} The result of the operation.
  * @throws {responseError} If the operation fails.
  */
-export const safeFindById = async (model, id, errMessage) => {
+export const safeFindById = async (model, id, options = {}) => {
+    const { errMessage, errOnNotFound = true, projection } = options;
     const { modelName } = model;
     if (!mongoose.Types.ObjectId.isValid(id)) throw new responseError(400, `Invalid ID format for ${modelName}`);
     let result;
     try {
-        result = await model.findById(id);
-        if (!result) throw new Error();
+        result = await model.findById(id, projection);
+        if (!result & errOnNotFound) throw new Error();
         return result;
     } catch (error) {
-        if (!result) throw new responseError(404, `${modelName} not found`);
+        if (!result & errOnNotFound) throw new responseError(404, `${modelName} not found`);
         else throw new responseError(500, errMessage || `Error reading ${modelName} from database`, error);
     }
 };
 
 
+
 /**
  * Safely performs a find operation on a Mongoose model.
  * @param {mongoose.Model} model - The Mongoose model to perform the operation on.
- * @param {Object} data - The query filter to find the documents by.
+ * @param {Object} data - The filter to apply to find the documents.
  * @param {Object} [options] - Options for the operation.
  * @param {string} [options.errMessage] - The error message to use if the operation fails.
+ * @param {Object} [options.projection] - The projection to apply to the found documents.
  * @returns {Promise<mongoose.Document[]>} The result of the operation.
- * @throws {responseError} If the operation fails or no documents are found.
+ * @throws {responseError} If the operation fails.
  */
-
 export const safeFind = async (model, data, options = {}) => {
-    const { errMessage } = options;
+    const { errMessage, errOnNotFound, projection = {} } = options;
     const { modelName } = model;
     let result;
     try {
-        result = await model.find(data);
-        if (!result.length) throw new Error();
+        result = await model.find(data, projection);
+        if (result.length == 0 && errOnNotFound) throw new Error();
         return result;
     } catch (error) {
-        if (!result.length) throw new responseError(404, `No ${modelName}s found`);
+        if (result.length == 0 && errOnNotFound) throw new responseError(404, `No ${modelName}s found`);
         throw new responseError(500, errMessage || `Error reading ${modelName}s from database`, error);
     }
 };

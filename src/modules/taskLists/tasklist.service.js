@@ -1,60 +1,50 @@
-import User from "../../models/user.model.js";
-import bcrypt from "bcrypt"
-import jwt from "jsonwebtoken"
 import { responseError } from "../../utils/errorHandler.js";
-import TaskList from "../../models/taskList.model.js";
-import { safeCreate, safeDelete, safeDeleteById, safeFind, safeFindById, safeFindOne, safeUpdateById } from "../../utils/dbSafeUtils.js";
+import { safeCreate, safeDeleteById, safeFind, safeFindOne, safeUpdateById, findByIdAndVerifyOwner } from "../../utils/dbSafeUtils.js";
 import taskListModel from "../../models/taskList.model.js";
+import taskModel from "../../models/task.model.js";
 
 //? findByIdAndUpdate ? Should I use it? Does it apply valiadtion ? 
-//* => No by default, But by using "runValidators: true" it does.
+//* => No by default, But by using "runValidators: true" it does, Implemented in SafeUpdateById
 //? When doing write operations, How to prevent user form editing others' data? 
 //* => Done.
 
+
 const taskListService = {
     getTaskLists: async (userId) => {
-        const taskLists = await safeFind(taskListModel, { userId });
-        return taskLists
+        return await safeFind(taskListModel, { userId }, { sort: { createdAt: 1 }, projection: { userId: 0, __v: 0, isDefault: 0 } });
     },
     createTaskList: async (userId, taskList) => {
         taskList.userId = userId
-        const createdTaskList = await safeCreate(taskListModel, taskList);
-        return createdTaskList
+        const alreadyExists = await safeFindOne(taskListModel, { title: taskList.title, userId }, { errOnNotFound: false });
+        if (alreadyExists) throw new responseError(409, "TaskList with same name already exists");
+        return await safeCreate(taskListModel, taskList);
     },
     getTaskListById: async (userId, taskListId) => {
-        const taskList = await safeFindById(taskListModel, taskListId);
-        if (taskList.userId != userId) throw new responseError(403, "Unauthorized: You don't have access to that resource");
-        return taskList
+        return await findByIdAndVerifyOwner(taskListModel, taskListId, userId);
     },
     updateTaskListById: async (userId, taskListId, newTaskList) => {
-        const taskList = await safeFindById(taskListModel, taskListId);
-        if (taskList.isDefault == true) throw new responseError(403, `The default 'Inbox' taskList can't be modified`)
-        if (taskList.userId != userId) throw new responseError(403, "Unauthorized: You don't have access to that resource");
-        const updatedTasklist = await safeUpdateById(taskListModel, taskListId, newTaskList);
-        return updatedTasklist;
+        const taskList = await findByIdAndVerifyOwner(taskListModel, taskListId, userId);
+        if (taskList.isDefault == true) throw new responseError(403, `The default 'Inbox' taskList can't be modified`);
+        return await safeUpdateById(taskListModel, taskListId, newTaskList);
     },
-    deleteTaskListById: async (userId, taskListId) => {
-        const taskList = await safeFindById(taskListModel, taskListId);
-        if (taskList.isDefault == true) throw new responseError(403, `The default 'Inbox' taskList can't be modified`)
-        if (taskList.userId != userId) throw new responseError(403, "Unauthorized: You don't have access to that resource");
+    deleteTaskListById: async (userId, taskListId) => { //TODO Handle nested tasks
+        const taskList = await findByIdAndVerifyOwner(taskListModel, taskListId, userId);
+        if (taskList.isDefault == true) throw new responseError(403, `The default 'Inbox' taskList can't be modified`);
         await safeDeleteById(taskListModel, taskListId);
     },
 
     getTasksByTaskListId: async (userId, taskListId) => {
-        const taskList = await safeFindById(taskListModel, taskListId);
-        if (taskList.userId != userId) throw new responseError(403, "Unauthorized: You don't have access to that resource");
-        const tasks = await safeFind(taskModel, { taskListId, userId });
-        return tasks
+        await findByIdAndVerifyOwner(taskListModel, taskListId, userId);
+        return await safeFind(taskModel, { taskListId, userId });
     },
     createTaskByTaskListId: async (userId, taskListId, newTask) => {
         newTask.taskListId = taskListId;
         newTask.userId = userId;
-        const taskList = await safeFindById(taskListModel, taskListId);
-        if (taskList.userId != userId) throw new responseError(403, "Unauthorized: You don't have access to that resource");
-        const createdTask = await safeCreate(taskModel, newTask);
-        return createdTask
+        await findByIdAndVerifyOwner(taskListModel, taskListId, userId);
+        return await safeCreate(taskModel, newTask);
     },
 
 }
 
 export default taskListService
+

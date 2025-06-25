@@ -1,6 +1,9 @@
 import mongoose, { mongo } from "mongoose";
 import { responseError } from "./errorHandler.js";
 //TODO Options object for all functions
+//MIGHTDO: safeFindOrCreate, similar to Sequalize
+//MIGHTDO: safeUpdateByIdAndVerifyOwner
+//MIGHTDO: safeDeleteByIdAndVerifyOwner
 
 
 /**
@@ -30,7 +33,7 @@ export const safeFindOne = async (model, filter, options = {}) => {
 
 
 /**
- * Safely performs a findById operation on a Mongoose model.
+ * Safely performs a findById operation on a Mongoose model, validates the given id.
  * @param {mongoose.Model} model - The Mongoose model to perform the operation on.
  * @param {string} id - The id of the document to find.
  * @param {Object} [options] - Options for the operation.
@@ -55,16 +58,18 @@ export const safeFindById = async (model, id, options = {}) => {
     }
 };
 
+
 /**
- * Finds a document by its ID and verifies that the user has access to it.
+ * Finds a document by its ID and verifies its ownership, it checks if the item has a reference to the owner.
  * @param {mongoose.Model} model - The Mongoose model to perform the operation on.
- * @param {string} itemId - The id of the document to find.
- * @param {string} userId - The id of the user to verify access for.
- * @returns {Promise<mongoose.Document>} The document if the user has access.
- * @throws {responseError} If the user does not have access, or if the operation fails.
+ * @param {string} itemId - The ID of the document to find.
+ * @param {string} ownerId - The ID of the user to verify as the owner of the document.
+ * @returns {Promise<mongoose.Document>} The document if found and ownership is verified.
+ * @throws {responseError} If the ID is invalid, the document is not found, or the user is not the owner.
  */
-export const findByIdAndVerifyOwner = async (model, itemId, userId) => { //Not Abstract
-    if (!mongoose.Types.ObjectId.isValid(userId)) throw new responseError(400, `Invalid ID format for userId`);
+
+export const findByIdAndVerifyUser = async (model, itemId, userId) => { //Coupled with business logic
+    if (!mongoose.Types.ObjectId.isValid(userId)) throw new responseError(400, `Invalid ID format for user`); //* change to "owner" for the reusable package
     const item = await safeFindById(model, itemId);
     if (item.userId != userId) throw new responseError(403, "Unauthorized: You don't have access to that resource");
     return item;
@@ -158,42 +163,70 @@ export const safeUpdateById = async (model, id, updateData, errMessage) => {
     }
 };
 
+
 /**
  * Safely performs a delete operation on a Mongoose model.
  * @param {mongoose.Model} model - The Mongoose model to perform the operation on.
  * @param {Object} filter - The filter to apply to find the document to delete.
- * @param {string} [errMessage="Error deleting from database"] - The error message to use if the operation fails.
+ * @param {string} [errMessage] - The error message to use if the operation fails.
  * @returns {Promise<mongoose.DeleteResult>} The result of the operation.
  * @throws {responseError} If the operation fails.
  */
-export const safeDelete = async (model, filter, errMessage) => {
+export const safeDelete = async (model, filter, options = {}) => {
+    const { hardDelete = false, errOnNotFound = true, addDeletedAt = true, errMessage } = options;
     const { modelName } = model;
+    let results;
     try {
-        const result = await model.deleteOne(filter);
-        return result;
+        if (hardDelete) await model.deleteMany(filter);
+        else {
+            const updateData = addDeletedAt ? { deletedAt: new Date() } : { isDeleted: true };
+            results = await model.updateMany(filter, updateData);
+        }
+        if (results.length == 0 && errOnNotFound) throw new responseError(404, `${modelName} not found`);
+        return results;
     } catch (error) {
+        if (error instanceof responseError) throw error;
         throw new responseError(500, errMessage || `Error deleting ${modelName} from database`, error);
     }
 };
 
+
 /**
- * Safely performs a delete operation on a Mongoose model by Id, validates the id.
+ * Safely performs a delete operation on a Mongoose model by Id, soft deletes by default.
  * @param {mongoose.Model} model - The Mongoose model to perform the operation on.
  * @param {string} id - The id of the document to delete.
- * @param {string} [errMessage="Error deleting from database"] - The error message to use if the operation fails.
- * @returns {Promise<mongoose.Document>} The result of the operation.
- * @throws {responseError} If the operation fails.
+ * @param {Object} [options] - Options for the operation.
+ * @param {boolean} [options.hardDelete=false] - Whether to perform a hard delete.
+ * @param {boolean} [options.errOnNotFound=true] - Whether to throw an error if no document is found.
+ * @param {boolean} [options.addDeletedAt=false] - Whether to add a 'deletedAt' timestamp on soft delete.
+ * @param {string} [errMessage] - The error message to use if the operation fails.
+ * @returns {Promise<mongoose.Document|null>} The result of the operation.
+ * @throws {responseError} If the id is invalid, the document is not found, or an error occurs during the operation.
  */
-export const safeDeleteById = async (model, id, errMessage) => {
+
+export const safeDeleteById = async (model, id, options = {}) => { //TODOTEST
+    const { hardDelete = false, errOnNotFound = true, addDeletedAt = true, errMessage } = options;
     const { modelName } = model;
+    let result;
     if (!mongoose.Types.ObjectId.isValid(id)) throw new responseError(400, `Invalid ID format for ${modelName}`);
     try {
-        const result = await model.findByIdAndDelete(id);
+        if (hardDelete) await model.findByIdAndDelete(id);
+        else {
+            const updateData = addDeletedAt ? { deletedAt: new Date() } : { isDeleted: true };
+            await model.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
+        }
+        result = await model.findById(id);
+        if (!result && errOnNotFound) throw new responseError(404, `${modelName} not found`);
         return result;
     } catch (error) {
+        if (error instanceof responseError) throw error;
         throw new responseError(500, errMessage || `Error deleting ${modelName} from database`, error);
     }
 };
+
+// export const softDeleteById = async (model, id, errMessage) => { //Coupled with bussiness logic
+//     await safeUpdateById(model, id, { deletedAt: new Date() }, errMessage);
+// };
 
 
 

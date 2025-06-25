@@ -5,7 +5,7 @@ import successHandler from "../../utils/successHandler.js";
 const taskController = {
     getTasks: asyncHandler(async (req, res) => {
         const { userId } = req;
-        const tasks = await taskService.getTasks(userId);
+        const tasks = await taskService.getTasks(userId, req.query);
         return successHandler(res, { message: "Tasks fetched successfully", tasks })
     }),
 
@@ -33,10 +33,16 @@ const taskController = {
         return successHandler(res, { message: "Task deleted successfully" })
     }),
 
-    toggleTaskStatusById: asyncHandler(async (req, res) => {
+    toggleTaskCompletionById: asyncHandler(async (req, res) => {
         const { userId, params: { taskId } } = req;
-        await taskService.toggleTaskStatusById(userId, taskId);
-        return successHandler(res, { message: "Task status updated successfully" })
+        const task = await taskService.toggleTaskCompletionById(userId, taskId);
+        return successHandler(res, { message: "Changed completion status successfully", task })
+    }),
+
+    getSubtasksByTaskId: asyncHandler(async (req, res) => {
+        const { userId, params: { taskId } } = req;
+        const subtasks = await taskService.getSubtasksByTaskId(userId, taskId);
+        return successHandler(res, { message: "Subtasks fetched successfully", subtasks })
     }),
 }
 

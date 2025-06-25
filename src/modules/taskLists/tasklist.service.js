@@ -1,5 +1,5 @@
 import { responseError } from "../../utils/errorHandler.js";
-import { safeCreate, safeDeleteById, safeFind, safeFindOne, safeUpdateById, findByIdAndVerifyOwner } from "../../utils/dbSafeUtils.js";
+import { safeCreate, safeDeleteById, safeFind, safeFindOne, safeUpdateById, findByIdAndVerifyUser } from "../../utils/dbSafeUtils.js";
 import taskListModel from "../../models/taskList.model.js";
 import taskModel from "../../models/task.model.js";
 
@@ -20,27 +20,27 @@ const taskListService = {
         return await safeCreate(taskListModel, taskList);
     },
     getTaskListById: async (userId, taskListId) => {
-        return await findByIdAndVerifyOwner(taskListModel, taskListId, userId);
+        return await findByIdAndVerifyUser(taskListModel, taskListId, userId);
     },
     updateTaskListById: async (userId, taskListId, newTaskList) => {
-        const taskList = await findByIdAndVerifyOwner(taskListModel, taskListId, userId);
+        const taskList = await findByIdAndVerifyUser(taskListModel, taskListId, userId);
         if (taskList.isDefault == true) throw new responseError(403, `The default 'Inbox' taskList can't be modified`);
         return await safeUpdateById(taskListModel, taskListId, newTaskList);
     },
     deleteTaskListById: async (userId, taskListId) => { //TODO Handle nested tasks
-        const taskList = await findByIdAndVerifyOwner(taskListModel, taskListId, userId);
+        const taskList = await findByIdAndVerifyUser(taskListModel, taskListId, userId);
         if (taskList.isDefault == true) throw new responseError(403, `The default 'Inbox' taskList can't be modified`);
         await safeDeleteById(taskListModel, taskListId);
     },
 
     getTasksByTaskListId: async (userId, taskListId) => {
-        await findByIdAndVerifyOwner(taskListModel, taskListId, userId);
+        await findByIdAndVerifyUser(taskListModel, taskListId, userId);
         return await safeFind(taskModel, { taskListId, userId });
     },
     createTaskByTaskListId: async (userId, taskListId, newTask) => {
         newTask.taskListId = taskListId;
         newTask.userId = userId;
-        await findByIdAndVerifyOwner(taskListModel, taskListId, userId);
+        await findByIdAndVerifyUser(taskListModel, taskListId, userId);
         return await safeCreate(taskModel, newTask);
     },
 

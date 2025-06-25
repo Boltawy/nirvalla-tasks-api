@@ -1,41 +1,27 @@
 import taskModel from "../../models/task.model.js";
 import taskListModel from "../../models/taskList.model.js";
-import { safeCreate, safeDelete, safeDeleteById, safeFind, safeFindById, safeFindOne, safeUpdateById } from "../../utils/dbSafeUtils.js";
+import { findByIdAndVerifyUser, safeCreate, safeDelete, safeDeleteById, safeFind, safeFindById, safeFindOne, safeUpdateById } from "../../utils/dbSafeUtils.js";
 import { taskListSchema } from "../../middleware/validationSchemas.js";
 import { responseError } from "../../utils/errorHandler.js";
 
 const taskService = {
-    getTasks: async (userId) => {
-        const tasks = await safeFind(taskModel, { userId });
-        return tasks
+    getTasks: async (userId, query) => { //? hard to understand logic ?
+        const showCompleted = query.showCompleted == "true" ? {} : { completedAt: null };
+        const showSubtasks = query.showSubtasks == "true" ? {} : { parentId: null };
+        const showDeleted = query.showDeleted == "true" ? {} : { deletedAt: null };
+        let filterObject = { userId, ...showCompleted, ...showSubtasks, ...showDeleted };
+        return await safeFind(taskModel, filterObject);
     },
-    //STEP
-    /*
-    Handle if taskListId is provided and :
-        1. is not valid
-        2. does not belong to the user
-    handle If taskListId is not provided but taskListTitle is and:
-        1. is not valid
-        2. no matching taskList
-        3. does not belong to the user
-    handle if neither taskListId nor taskListTitle is provided:
-        1. add to "inbox" taskList
-    
-    
-    
-    */
     createTask: async (userId, newTask) => {
         newTask.userId = userId;
         let fetchedTaskList
         const { taskListId, taskListTitle } = newTask;
 
         if (taskListId) {
-            fetchedTaskList = await safeFindById(taskListModel, taskListId);
-            if (fetchedTaskList.userId != userId) throw new responseError(403, "Unauthorized: You don't have access to that resource");
+            await findByIdAndVerifyUser(taskListModel, taskListId, userId);
             return await safeCreate(taskModel, newTask);
         }
-
-        if (taskListTitle) {
+        if (taskListTitle) { //Safe Find or create
             fetchedTaskList = await safeFindOne(taskListModel, { title: taskListTitle, userId }, { errOnNotFound: false });
             if (!fetchedTaskList) {
                 fetchedTaskList = await safeCreate(taskListModel, { title: taskListTitle, userId });
@@ -50,30 +36,32 @@ const taskService = {
     },
 
     getTaskById: async (userId, taskId) => {
-        const task = await safeFindById(taskModel, taskId);
-        if (task.userId != userId) throw new responseError(403, "Unauthorized: You don't have access to that resource");
-        return task
+        return await findByIdAndVerifyUser(taskModel, taskId, userId);
     },
 
-    // updateTaskById: async (userId, taskId, updatedTask) => {
-    //     const task = await safeFindById(taskModel, taskId);
-    //     if (task.userId != userId) throw new responseError(403, "Unauthorized: You don't have access to that resource");
-    //     const updatedTask = await safeUpdateById(taskModel, taskId, updatedTask);
-    //     return updatedTask
-    // },
+    updateTaskById: async (userId, taskId, updatedTask) => { //TODO Add validation for nested tasks
+        await findByIdAndVerifyUser(taskModel, taskId, userId);
+        if (updatedTask.taskListId) await findByIdAndVerifyUser(taskListModel, updatedTask.taskListId, userId); //TODOTEST if trying to move to tasklist of another user
+        if (updatedTask.parentId) await findByIdAndVerifyUser(taskModel, updatedTask.parentId, userId); //TODOTEST if trying to append as subtask to a task of another user
+        return await safeUpdateById(taskModel, taskId, updatedTask);
+    },
 
-    //     deleteTaskById: async (userId, taskId) => {
-    //         const task = await safeFindById(taskModel, taskId);
-    //         if (task.userId != userId) throw new responseError(403, "Unauthorized: You don't have access to that resource");
-    //         await safeDeleteById(taskModel, taskId);
-    //     },
+    deleteTaskById: async (userId, taskId) => {
+        await findByIdAndVerifyUser(taskModel, taskId, userId);
+        await safeDeleteById(taskModel, taskId);
+        await safeDelete(taskModel, { parentId: taskId });
+    },
 
-    //     toggleTaskStatusById: async (userId, taskId) => {
-    //         const task = await safeFindById(taskModel, taskId);
-    //         if (task.userId != userId) throw new responseError(403, "Unauthorized: You don't have access to that resource");
-    //         const updatedTask = await safeUpdateById(taskModel, taskId, { isCompleted: !task.isCompleted });
-    //         return updatedTask
-    //     }
+    toggleTaskCompletionById: async (userId, taskId) => {
+        const task = await findByIdAndVerifyUser(taskModel, taskId, userId);
+        if (!task.completedAt) return await safeUpdateById(taskModel, taskId, { completedAt: Date.now() });
+        else return await safeUpdateById(taskModel, taskId, { completedAt: null });
+    },
+
+    getSubtasksByTaskId: async (userId, taskId) => {
+        await findByIdAndVerifyUser(taskModel, taskId, userId);
+        return await safeFind(taskModel, { userId, parentId: taskId });
+    }
 }
 
 export default taskService

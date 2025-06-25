@@ -35,7 +35,7 @@ export const taskListSchema = {
             .max(40)
             .required(),
         description: Joi.string()
-            .max(200)
+            .max(200),
     })
 }
 
@@ -47,6 +47,22 @@ export const taskSchema = {
         description: Joi.string()
             .max(200),
         taskListId: Joi.string(),
-        taskListTitle: Joi.string()
+        taskListTitle: Joi.string(),
+        parentId: Joi.string(),
     })
 }
+
+export const taskUpdateSchema = { //MIGHTDO extract common fields
+    body: Joi.object({
+        title: Joi.string()
+            .max(40),
+        description: Joi.string()
+            .max(200),
+        taskListId: Joi.string(),
+        taskListTitle: Joi.string(),
+        parentId: Joi.string(),
+    })
+}
+
+
+//MIGHTDO: A way to sync mongoose schemas and joi schemas (joigoose)

@@ -5,7 +5,9 @@ import express from 'express'
 import authRouter from './src/modules/auth/auth.router.js'
 import taskListRouter from './src/modules/taskLists/taskList.router.js'
 import taskRouter from './src/modules/tasks/task.router.js'
+import ServerlessHttp from 'serverless-http'
 // import usersRouter from './src/modules/users/users.router.js'
+
 
 
 const app = express()
@@ -26,4 +28,5 @@ app.use((err, req, res, next) => { //global error handler
 })
 
 app.get('/', (req, res) => res.send('Hello World!'))
-app.listen(process.env.PORT, () => console.log(`Sample app listening on port ${process.env.PORT}.`))
+// app.listen(process.env.PORT, () => console.log(`Sample app listening on port ${process.env.PORT}.`))
+export default ServerlessHttp(app)

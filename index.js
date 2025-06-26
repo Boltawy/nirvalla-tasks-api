@@ -12,6 +12,7 @@ const app = express()
 
 establishDBConnection()
 app.use(express.json())
+// app.use(express.static('public'))
 
 app.use("/api/v1/auth", authRouter)
 app.use("/api/v1/taskLists", taskListRouter)
@@ -25,5 +26,5 @@ app.use((err, req, res, next) => { //global error handler
     })
 })
 
-app.get('/', (req, res) => res.send('Hello World!'))
+app.get('/', (req, res) => res.sendFile("index.html", { root: "./public" }))
 app.listen(process.env.PORT, () => console.log(`Sample app listening on port ${process.env.PORT}.`))

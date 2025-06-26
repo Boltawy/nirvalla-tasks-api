@@ -28,5 +28,4 @@ app.use((err, req, res, next) => { //global error handler
 })
 
 app.get('/', (req, res) => res.send('Hello World!'))
-// app.listen(process.env.PORT, () => console.log(`Sample app listening on port ${process.env.PORT}.`))
-export default ServerlessHttp(app)
+app.listen(process.env.PORT, () => console.log(`Sample app listening on port ${process.env.PORT}.`))

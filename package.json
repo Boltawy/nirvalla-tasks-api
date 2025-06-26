@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "node --watch index.js",
-    "nodemon": "nodemon --quiet index.js"
+    "nodemon": "nodemon --quiet index.js",
+    "start": "node index.js"
   },
   "keywords": [],
   "author": "",

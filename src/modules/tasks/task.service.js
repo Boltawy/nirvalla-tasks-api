@@ -14,6 +14,7 @@ const taskService = {
     },
     createTask: async (userId, newTask) => {
         newTask.userId = userId;
+        if (newTask.parentId) await findByIdAndVerifyUser(taskModel, newTask.parentId, userId); //TODO check if parent task exists and of same user
         let fetchedTaskList
         const { taskListId, taskListTitle } = newTask;
 

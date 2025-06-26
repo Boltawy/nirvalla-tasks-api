@@ -216,7 +216,8 @@ export const safeDeleteById = async (model, id, options = {}) => { //TODOTEST
             await model.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
         }
         result = await model.findById(id);
-        if (!result && errOnNotFound) throw new responseError(404, `${modelName} not found`);
+        if (!result && errOnNotFound || result?.deletedAt && errOnNotFound) throw new responseError(404, `${modelName} not found`);
+        console.log(result)
         return result;
     } catch (error) {
         if (error instanceof responseError) throw error;

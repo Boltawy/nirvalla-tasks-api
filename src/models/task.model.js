@@ -12,6 +12,7 @@ const taskSchema = new Schema({
     // scheduledDate: { type: Date, default: null },
     // status: { type: String, default: "not-started", enum: ["not-started", "queued", "in-progress", "completed"] },
     // priority: { type: String, default: "low", enum: ["none", "low", "medium", "high", "urgent"] },
+    // project : { type: mongoose.Schema.Types.ObjectId, ref: 'Project', default: null },
 }, { timestamps: true })
 
 const taskModel = mongoose.models.Task || model("Task", taskSchema)

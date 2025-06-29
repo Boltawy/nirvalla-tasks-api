@@ -2,6 +2,7 @@ import { responseError } from "../../utils/errorHandler.js";
 import { safeCreate, safeDeleteById, safeFind, safeFindOne, safeUpdateById, findByIdAndVerifyUser } from "../../utils/dbSafeUtils.js";
 import taskListModel from "../../models/taskList.model.js";
 import taskModel from "../../models/task.model.js";
+import { mongo } from "mongoose";
 
 //? findByIdAndUpdate ? Should I use it? Does it apply valiadtion ? 
 //* => No by default, But by using "runValidators: true" it does, Implemented in SafeUpdateById
@@ -27,10 +28,22 @@ const taskListService = {
         if (taskList.isDefault == true) throw new responseError(403, `The default 'Inbox' taskList can't be modified`);
         return await safeUpdateById(taskListModel, taskListId, newTaskList);
     },
-    deleteTaskListById: async (userId, taskListId) => { //TODO Handle nested tasks
+    deleteTaskListById: async (userId, taskListId) => { //TODOTEST
         const taskList = await findByIdAndVerifyUser(taskListModel, taskListId, userId);
         if (taskList.isDefault == true) throw new responseError(403, `The default 'Inbox' taskList can't be modified`);
-        await safeDeleteById(taskListModel, taskListId);
+        const session = await mongo.startSession();
+        session.startTransaction();
+        try {
+            await taskListModel.deleteOne({ _id: taskListId }, { session });
+            await taskModel.deleteMany({ taskListId }, { session });
+            await session.commitTransaction();
+        } catch (error) {
+            await session.abortTransaction();
+            throw responseError(500, "Error deleting taskList", error);
+        }
+        finally {
+            session.endSession();
+        }
     },
 
     getTasksByTaskListId: async (userId, taskListId) => {

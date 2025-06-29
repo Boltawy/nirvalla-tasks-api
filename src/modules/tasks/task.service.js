@@ -3,6 +3,7 @@ import taskListModel from "../../models/taskList.model.js";
 import { findByIdAndVerifyUser, safeCreate, safeDelete, safeDeleteById, safeFind, safeFindById, safeFindOne, safeUpdateById } from "../../utils/dbSafeUtils.js";
 import { taskListSchema } from "../../middleware/validationSchemas.js";
 import { responseError } from "../../utils/errorHandler.js";
+import mongoose from "mongoose";
 
 const taskService = {
     getTasks: async (userId, query) => { //? hard to understand logic ?
@@ -47,10 +48,20 @@ const taskService = {
         return await safeUpdateById(taskModel, taskId, updatedTask);
     },
 
-    deleteTaskById: async (userId, taskId) => {
+    deleteTaskById: async (userId, taskId) => { //TODOTEST
         await findByIdAndVerifyUser(taskModel, taskId, userId);
-        await safeDeleteById(taskModel, taskId);
-        await safeDelete(taskModel, { parentId: taskId });
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
+            await taskModel.deleteOne({ _id: taskId }, { session });
+            await taskModel.deleteMany({ parentId: taskId }, { session });
+            await session.commitTransaction();
+        } catch (error) {
+            await session.abortTransaction();
+            throw responseError(500, "Error deleting task", error);
+        } finally {
+            session.endSession();
+        }
     },
 
     toggleTaskCompletionById: async (userId, taskId) => {

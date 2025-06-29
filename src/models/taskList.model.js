@@ -5,7 +5,7 @@ const taskListSchema = new Schema({
     description: { type: String, maxLength: 200 },
     isDefault: { type: Boolean, default: false },
     deletedAt: { type: Date, default: null },
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
 }, { timestamps: true })
 
 const taskListModel = mongoose.models.TaskList || model("TaskList", taskListSchema)

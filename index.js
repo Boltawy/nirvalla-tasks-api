@@ -5,7 +5,6 @@ import express from 'express'
 import authRouter from './src/modules/auth/auth.router.js'
 import taskListRouter from './src/modules/taskLists/taskList.router.js'
 import taskRouter from './src/modules/tasks/task.router.js'
-// import usersRouter from './src/modules/users/users.router.js'
 
 
 const app = express()
@@ -15,6 +14,7 @@ app.use(express.json())
 app.use("/api/v1/auth", authRouter)
 app.use("/api/v1/taskLists", taskListRouter)
 app.use("/api/v1/tasks", taskRouter)
+app.use("/", express.static("./public"))
 app.use((req, res, next) => {
     next({
         statusCode: 404,

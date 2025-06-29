@@ -9,22 +9,28 @@ import taskRouter from './src/modules/tasks/task.router.js'
 
 
 const app = express()
-
 establishDBConnection()
 app.use(express.json())
-// app.use(express.static('public'))
 
 app.use("/api/v1/auth", authRouter)
 app.use("/api/v1/taskLists", taskListRouter)
 app.use("/api/v1/tasks", taskRouter)
+app.use((req, res, next) => {
+    next({
+        statusCode: 404,
+        status: "Error",
+        message: "Route not found"
+    })
+})
+
 
 app.use((err, req, res, next) => { //global error handler
     res.status(err.statusCode || 500).json({
-        "status": err.status,
-        "message": err.message,
+        "status": err.status || "Error",
+        "message": err.message || "Something went wrong",
         "error": err.error
     })
 })
 
 app.get('/', (req, res) => res.sendFile("index.html", { root: "./public" }))
-app.listen(process.env.PORT, () => console.log(`Sample app listening on port ${process.env.PORT}.`))
+app.listen(process.env.PORT, () => console.log(`Nirvalla Tasks listening on port ${process.env.PORT}.`))

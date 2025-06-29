@@ -9,7 +9,7 @@ import taskListModel from "../../models/taskList.model.js";
 const authService = {
     signUp: async (userName, email, password) => {
         const user = await safeFindOne(userModel, { email }, { errOnNotFound: false })
-        if (user) throw new responseError(409, "User already exists")
+        if (user) throw new responseError(409, "A user already exists with given email")
         const hashedPassword = await bcrypt.hash(password, 8)
         const { _id: userId } = await safeCreate(userModel, { userName, email, password: hashedPassword }) //TODO: Atomic transaction: creating user and taskList together or they both fail
         await safeCreate(taskListModel, { userId, title: "Inbox", isDefault: true })

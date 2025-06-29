@@ -3,7 +3,7 @@ import Joi from "joi";
 export const signupSchema = {
     body: Joi.object({
         userName: Joi.string()
-            .alphanum()
+            .pattern(new RegExp('^[a-zA-Z0-9 ]+$')) //Alphanum + space
             .min(3)
             .max(25)
             .required(),

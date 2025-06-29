@@ -3,47 +3,47 @@ import { asyncHandler } from "../../utils/errorHandler.js";
 import successHandler from "../../utils/successHandler.js";
 
 const taskController = {
-    getTasks: asyncHandler(async (req, res) => {
+    getTasks: async (req, res) => {
         const { userId } = req;
         const tasks = await taskService.getTasks(userId, req.query);
         return successHandler(res, { message: "Tasks fetched successfully", tasks })
-    }),
+    },
 
-    createTask: asyncHandler(async (req, res) => {
+    createTask: async (req, res) => {
         const { userId, body: newTask } = req;
         const createdTask = await taskService.createTask(userId, newTask);
         return successHandler(res, { message: "Task created successfully", createdTask })
-    }),
+    },
 
-    getTaskById: asyncHandler(async (req, res) => {
+    getTaskById: async (req, res) => {
         const { userId, params: { taskId } } = req;
         const task = await taskService.getTaskById(userId, taskId);
         return successHandler(res, { message: "Task fetched successfully", task })
-    }),
+    },
 
-    updateTaskById: asyncHandler(async (req, res) => {
+    updateTaskById: async (req, res) => {
         const { userId, params: { taskId }, body: updatedTask } = req;
         await taskService.updateTaskById(userId, taskId, updatedTask);
         return successHandler(res, { message: "Task updated successfully", updatedTask })
-    }),
+    },
 
-    deleteTaskById: asyncHandler(async (req, res) => {
+    deleteTaskById: async (req, res) => {
         const { userId, params: { taskId } } = req;
         await taskService.deleteTaskById(userId, taskId);
         return successHandler(res, { message: "Task deleted successfully" })
-    }),
+    },
 
-    toggleTaskCompletionById: asyncHandler(async (req, res) => {
+    toggleTaskCompletionById: async (req, res) => {
         const { userId, params: { taskId } } = req;
         const task = await taskService.toggleTaskCompletionById(userId, taskId);
         return successHandler(res, { message: "Changed completion status successfully", task })
-    }),
+    },
 
-    getSubtasksByTaskId: asyncHandler(async (req, res) => {
+    getSubtasksByTaskId: async (req, res) => {
         const { userId, params: { taskId } } = req;
         const subtasks = await taskService.getSubtasksByTaskId(userId, taskId);
         return successHandler(res, { message: "Subtasks fetched successfully", subtasks })
-    }),
+    },
 }
 
 export default taskController;

@@ -1,5 +1,6 @@
 /**
  * Wrapper function to handle asynchronous middleware errors.
+ * @deprecated Express 5 natively supports async middleware
  * @param {Function} fn - The asynchronous function to be handled.
  * @returns {Function} A new function that executes the provided function and catches any errors.
  */

@@ -5,11 +5,14 @@ import express from 'express'
 import authRouter from './src/modules/auth/auth.router.js'
 import taskListRouter from './src/modules/taskLists/taskList.router.js'
 import taskRouter from './src/modules/tasks/task.router.js'
+import cors from 'cors'
 
 
 const app = express()
 establishDBConnection()
 app.use(express.json())
+
+app.use(cors())
 
 app.use("/api/v1/auth", authRouter)
 app.use("/api/v1/taskLists", taskListRouter)

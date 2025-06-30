@@ -15,7 +15,8 @@ const authService = {
         const session = await mongoose.startSession();
         session.startTransaction(); //TODOTEST
         try {
-            const { _id: userId } = await userModel.create([{ userName, email, password: hashedPassword }], { session });
+            const result = await userModel.create([{ userName, email, password: hashedPassword }], { session });
+            const { _id: userId } = result[0];
             await taskListModel.create([{ userId, title: "Inbox", isDefault: true }], { session });
             await session.commitTransaction();
         } catch (error) {
@@ -25,6 +26,18 @@ const authService = {
             session.endSession();
         }
     },
+    // signUp: async (userName, email, password) => {
+    //     const user = await safeFindOne(userModel, { email }, { errOnNotFound: false })
+    //     if (user) throw new responseError(409, "A user already exists with given email")
+    //     const hashedPassword = await bcrypt.hash(password, 8)
+    //     try {
+    //         const result = await userModel.create([{ userName, email, password: hashedPassword }]);
+    //         console.log(result[0])
+    //         await taskListModel.create([{ userId, title: "Inbox", isDefault: true }]);
+    //     } catch (error) {
+    //         throw new responseError(500, "Error creating user", error);
+    //     }
+    // },
 
     login: async (loginEmail, loginPassword) => {
         const result = await safeFindOne(userModel, { email: loginEmail },); //Invalid Email, Or other server errors.

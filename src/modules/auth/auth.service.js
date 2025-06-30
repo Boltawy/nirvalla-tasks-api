@@ -13,7 +13,7 @@ const authService = {
         if (user) throw new responseError(409, "A user already exists with given email")
         const hashedPassword = await bcrypt.hash(password, 8)
         const session = await mongoose.startSession();
-        session.startTransaction(); //TODOTEST
+        session.startTransaction(); 
         try {
             const result = await userModel.create([{ userName, email, password: hashedPassword }], { session });
             const { _id: userId } = result[0];

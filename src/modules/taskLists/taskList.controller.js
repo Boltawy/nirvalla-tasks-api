@@ -6,13 +6,13 @@ const taskListController = {
     getTaskLists: async (req, res) => {
         const { userId } = req;
         const taskLists = await taskListService.getTaskLists(userId);
-        return successHandler(res, taskLists)
+        return successHandler(res, { message: "Task lists fetched successfully", taskLists })
     },
 
     createTaskList: async (req, res) => {
         const { userId, body: taskList } = req;
         const createdTaskList = await taskListService.createTaskList(userId, taskList);
-        return successHandler(res, createdTaskList)
+        return successHandler(res, { message: "Task list created successfully", createdTaskList })
     },
 
     getTaskListById: async (req, res) => {

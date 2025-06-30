@@ -15,12 +15,12 @@ const authService = {
         const session = await mongoose.startSession();
         session.startTransaction(); //TODOTEST
         try {
-            const { _id: userId } = userModel.create([{ userName, email, password: hashedPassword }], { session });
+            const { _id: userId } = await userModel.create([{ userName, email, password: hashedPassword }], { session });
             await taskListModel.create([{ userId, title: "Inbox", isDefault: true }], { session });
             await session.commitTransaction();
         } catch (error) {
             await session.abortTransaction();
-            throw responseError(500, "Error creating user", error);
+            throw new responseError(500, "Error creating user", error);
         } finally {
             session.endSession();
         }

@@ -12,7 +12,7 @@ import { mongo } from "mongoose";
 
 const taskListService = {
     getTaskLists: async (userId) => {
-        return await safeFind(taskListModel, { userId }, { sort: { createdAt: 1 }, projection: { userId: 0, __v: 0, isDefault: 0 } });
+        return await safeFind(taskListModel, { userId }, { sort: { createdAt: 1 }, projection: { userId: 0, __v: 0 } });
     },
     createTaskList: async (userId, taskList) => {
         taskList.userId = userId

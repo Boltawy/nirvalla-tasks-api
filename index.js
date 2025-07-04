@@ -6,6 +6,7 @@ import authRouter from './src/modules/auth/auth.router.js'
 import taskListRouter from './src/modules/taskLists/taskList.router.js'
 import taskRouter from './src/modules/tasks/task.router.js'
 import cors from 'cors'
+import syncRouter from './src/modules/sync/sync.router.js'
 
 
 const app = express()
@@ -17,6 +18,7 @@ app.use(cors())
 app.use("/api/v1/auth", authRouter)
 app.use("/api/v1/taskLists", taskListRouter)
 app.use("/api/v1/tasks", taskRouter)
+app.use("/api/v1/sync", syncRouter)
 app.use("/", express.static("./public"))
 app.use((req, res, next) => {
     next({

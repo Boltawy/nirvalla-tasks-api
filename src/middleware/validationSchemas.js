@@ -39,7 +39,10 @@ export const taskListSchema = {
     })
 }
 
-export const taskSchema = {
+
+
+
+export const taskSchema = { //MIGHTDO Handle if nested tasks are sent
     body: Joi.object({
         title: Joi.string()
             .max(40)
@@ -49,6 +52,7 @@ export const taskSchema = {
         taskListId: Joi.string(),
         taskListTitle: Joi.string(),
         parentId: Joi.string(),
+        subtasks: Joi.array().items(taskSchema.body)
     })
 }
 
@@ -62,6 +66,23 @@ export const taskUpdateSchema = { //MIGHTDO extract common fields
         taskListTitle: Joi.string(),
         parentId: Joi.string(),
     })
+}
+
+export const populatedListSchema = { //For validating the "POST /sync" endpoint
+    body: Joi.object({
+        _id: Joi.string()
+            .required(),
+        title: Joi.string()
+            .max(40)
+            .required(),
+        description: Joi.string()
+            .max(200),
+        tasks: Joi.array().items(taskSchema.body)
+    })
+}
+
+export const populatedListArraySchema = {
+    body: Joi.array().items(populatedListSchema.body)
 }
 
 

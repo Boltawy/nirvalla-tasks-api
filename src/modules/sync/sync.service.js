@@ -41,7 +41,6 @@ const syncService = {
 
     depopulateLists: async (populatedLists) => {
         let tasklists = structuredClone(populatedLists);
-
         tasklists = tasklists.map((list) => {
             delete list.tasks;
             return list;

@@ -122,7 +122,7 @@ export const safeCreate = async (model, data, options = {}) => {
     const { modelName } = model;
     // const isArray = Array.isArray(data)
     try {
-        const result = await model.create(data, { session });
+        const result = await model.create(data, { session, ordered: true });
         return result;
     } catch (error) {
         throw new responseError(500, errMessage || `Error creating ${modelName} in database`, error.message || error);

@@ -73,7 +73,7 @@ const syncService = {
             await safeCreate(taskModel, sentTasks);
         }
         else {
-            const session = mongoose.startSession();
+            const session = await mongoose.startSession();
             session.startTransaction();
             try {
                 await safeDelete(taskModel, { userId, deletedAt: null }, { hardDelete: true, errOnNotFound: false, session });

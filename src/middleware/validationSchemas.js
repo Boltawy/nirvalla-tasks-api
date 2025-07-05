@@ -52,7 +52,7 @@ export const taskSchema = { //MIGHTDO Handle if nested tasks are sent
         taskListId: Joi.string(),
         taskListTitle: Joi.string(),
         parentId: Joi.string(),
-        subtasks: Joi.array().items(taskSchema.body)
+        subtasks: Joi.array().items(Joi.link().ref('taskSchema'))
     })
 }
 

@@ -84,18 +84,20 @@ export const findByIdAndVerifyUser = async (model, itemId, userId) => { //Couple
  * @param {Object} [options] - Options for the operation.
  * @param {string} [options.errMessage] - The error message to use if the operation fails.
  * @param {boolean} [options.errOnNotFound=false] - Whether to throw an error if no documents are found.
- * @param {Object} [options.projection] - The projection to apply to the found documents.
- * @param {Object} [options.sort] - The sort order to apply to the found documents.
+ * @param {Object} [options.projection={}] - The projection to apply to the found documents.
+ * @param {Object} [options.sort=null] - The sort to apply to the found documents.
+ * @param {boolean} [options.lean=false] - Whether to use lean() to get plain objects instead of mongoose documents.
  * @returns {Promise<mongoose.Document[]>} The result of the operation.
  * @throws {responseError} If the operation fails.
  */
 
 export const safeFind = async (model, filter, options = {}) => {
-    const { errMessage, errOnNotFound, projection = {}, sort = null } = options;
+    const { errMessage, errOnNotFound, projection = {}, sort = null, lean = false } = options;
     const { modelName } = model;
-    let result;
     try {
-        result = await model.find(filter, projection).sort(sort);
+        let query = model.find(filter, projection).sort(sort);
+        if (lean) query.lean()
+        const result = await query.exec();
         if (result.length == 0 && errOnNotFound) throw new responseError(404, `No ${modelName}s found`);
         return result;
     } catch (error) {
@@ -217,7 +219,6 @@ export const safeDeleteById = async (model, id, options = {}) => { //TODOTEST
         }
         result = await model.findById(id);
         if (!result && errOnNotFound || result?.deletedAt && errOnNotFound) throw new responseError(404, `${modelName} not found`);
-        console.log(result)
         return result;
     } catch (error) {
         if (error instanceof responseError) throw error;

@@ -10,7 +10,7 @@ const syncController = {
     syncToServer: async (req, res) => {
         const { userId, body: newPopulatedLists } = req;
         const populatedLists = await syncService.populateLists(userId);
-        await syncService.diffAndUpdate(userId, populatedLists, newPopulatedLists);
+        await syncService.InvalidateAndUpdate(userId, populatedLists, newPopulatedLists);
         return successHandler(res, { message: "Sync to server successfully"})
     }
 }

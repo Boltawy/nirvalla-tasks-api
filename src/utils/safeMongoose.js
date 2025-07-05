@@ -106,21 +106,26 @@ export const safeFind = async (model, filter, options = {}) => {
     }
 };
 
+
 /**
  * Safely performs a create operation on a Mongoose model.
  * @param {mongoose.Model} model - The Mongoose model to perform the operation on.
- * @param {Object} data - The data to create a new document with.
- * @param {string} [errMessage="Error creating in database"] - The error message to use if the operation fails.
- * @returns {Promise<mongoose.Document>} The result of the operation.
+ * @param {Object} data - The data to create the document with.
+ * @param {Object} [options] - Options for the operation.
+ * @param {string} [options.errMessage] - The error message to use if the operation fails.
+ * @param {ClientSession} [options.session] - The session to use if you want to use a transaction.
+ * @returns {Promise<mongoose.Document|mongoose.Document[]>} The result of the operation.
  * @throws {responseError} If the operation fails.
  */
-export const safeCreate = async (model, data, errMessage) => {
+export const safeCreate = async (model, data, options = {}) => {
+    const { errMessage, session } = options;
     const { modelName } = model;
+    // const isArray = Array.isArray(data)
     try {
-        const result = await model.create(data);
+        const result = await model.create(data, { session });
         return result;
     } catch (error) {
-        throw new responseError(500, errMessage || `Error creating ${modelName} in database`, error);
+        throw new responseError(500, errMessage || `Error creating ${modelName} in database`, error.message || error);
     }
 };
 
@@ -166,29 +171,39 @@ export const safeUpdateById = async (model, id, updateData, errMessage) => {
 };
 
 
+
+
 /**
- * Safely performs a delete operation on a Mongoose model.
+ * Safely performs a delete operation on a Mongoose model, with soft delete by default.
  * @param {mongoose.Model} model - The Mongoose model to perform the operation on.
- * @param {Object} filter - The filter to apply to find the document to delete.
- * @param {string} [errMessage] - The error message to use if the operation fails.
- * @returns {Promise<mongoose.DeleteResult>} The result of the operation.
+ * @param {Object} filter - The filter to apply to find the documents to delete.
+ * @param {Object} [options] - Options for the operation.
+ * @param {boolean} [options.hardDelete=false] - Whether to perform a hard delete.
+ * @param {boolean} [options.errOnNotFound=true] - Whether to throw an error if no documents are found.
+ * @param {boolean} [options.addDeletedAt=false] - Whether to add a 'deletedAt' timestamp on soft delete.
+ * @param {string} [options.errMessage] - The error message to use if the operation fails.
+ * @param {ClientSession} [options.session] - The session to use if you want to use a transaction.
+ * @returns {Promise<mongoose.DeleteWriteOpResultObject> | Promise<mongoose.UpdateWriteOpResult>} The result of the operation.
  * @throws {responseError} If the operation fails.
  */
 export const safeDelete = async (model, filter, options = {}) => {
-    const { hardDelete = false, errOnNotFound = true, addDeletedAt = true, errMessage } = options;
+    const { hardDelete = false, errOnNotFound = true, addDeletedAt = true, errMessage, session } = options;
     const { modelName } = model;
-    let results;
     try {
-        if (hardDelete) await model.deleteMany(filter);
+        if (hardDelete) {
+            await model.deleteMany(filter, { session });
+        }
         else {
             const updateData = addDeletedAt ? { deletedAt: new Date() } : { isDeleted: true };
-            results = await model.updateMany(filter, updateData);
+            let query = model.updateMany(filter, updateData);
+            if (session) query = query.session(session);
+            const results = await query.exec();
+            if (results.length == 0 && errOnNotFound) throw new responseError(404, `${modelName} not found`);
+            return results;
         }
-        if (results.length == 0 && errOnNotFound) throw new responseError(404, `${modelName} not found`);
-        return results;
     } catch (error) {
         if (error instanceof responseError) throw error;
-        throw new responseError(500, errMessage || `Error deleting ${modelName} from database`, error);
+        throw new responseError(500, errMessage || `Error deleting ${modelName} from database`, error.message || error);
     }
 };
 

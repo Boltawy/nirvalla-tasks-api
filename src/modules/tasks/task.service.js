@@ -1,6 +1,6 @@
 import taskModel from "../../models/task.model.js";
 import taskListModel from "../../models/taskList.model.js";
-import { findByIdAndVerifyUser, safeCreate, safeDelete, safeDeleteById, safeFind, safeFindById, safeFindOne, safeUpdateById } from "../../utils/dbSafeUtils.js";
+import { findByIdAndVerifyUser, safeCreate, safeDelete, safeDeleteById, safeFind, safeFindById, safeFindOne, safeUpdateById } from "../../utils/safeMongoose.js";
 import { taskListSchema } from "../../middleware/validationSchemas.js";
 import { responseError } from "../../utils/errorHandler.js";
 import mongoose from "mongoose";

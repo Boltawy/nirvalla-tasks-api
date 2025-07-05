@@ -8,10 +8,11 @@ const syncController = {
         return successHandler(res, { message: "Populated lists fetched successfully", populatedLists })
     },
     syncToServer: async (req, res) => {
-        const { userId, body: newPopulatedLists } = req;
-        const populatedLists = await syncService.populateLists(userId);
-        await syncService.InvalidateAndUpdate(userId, populatedLists, newPopulatedLists);
-        return successHandler(res, { message: "Sync to server successfully"})
+        const { body: { populatedLists } , userId } = req;
+        const { tasklists: sentTasklists, tasks: sentTasks } = await syncService.depopulateLists(populatedLists);
+        await syncService.forcePush(userId, sentTasklists, sentTasks); //TODO Implement a smarter sync algorithm
+        // await syncService.InvalidateAndUpdate(sentTasklists, sentTasks);
+        return successHandler(res, { message: "Sync to server successfully" })
     }
 }
 

@@ -2,7 +2,7 @@ import userModel from "../../models/user.model.js";
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import { responseError } from "../../utils/errorHandler.js";
-import { safeCreate, safeFindOne } from "../../utils/dbSafeUtils.js";
+import { safeCreate, safeFindOne } from "../../utils/safeMongoose.js";
 import taskListModel from "../../models/taskList.model.js";
 import mongoose from "mongoose";
 

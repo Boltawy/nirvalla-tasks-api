@@ -12,18 +12,24 @@ const authService = {
         const user = await safeFindOne(userModel, { email }, { errOnNotFound: false })
         if (user) throw new responseError(409, "A user already exists with given email")
         const hashedPassword = await bcrypt.hash(password, 8)
-        const session = await mongoose.startSession();
-        session.startTransaction(); 
-        try {
-            const result = await userModel.create([{ userName, email, password: hashedPassword }], { session });
+        if (Boolean(process.env.dev)) { //PROD: disabling transactions in local
+            const result = await userModel.create([{ userName, email, password: hashedPassword }]);
             const { _id: userId } = result[0];
-            await taskListModel.create([{ userId, title: "Inbox", isDefault: true }], { session });
-            await session.commitTransaction();
-        } catch (error) {
-            await session.abortTransaction();
-            throw new responseError(500, "Error creating user", error);
-        } finally {
-            session.endSession();
+            await taskListModel.create([{ userId, title: "Inbox", isDefault: true }]);
+        } else {
+            const session = await mongoose.startSession();
+            session.startTransaction();
+            try {
+                const result = await userModel.create([{ userName, email, password: hashedPassword }], { session });
+                const { _id: userId } = result[0];
+                await taskListModel.create([{ userId, title: "Inbox", isDefault: true }], { session });
+                await session.commitTransaction();
+            } catch (error) {
+                await session.abortTransaction();
+                throw new responseError(500, "Error creating user", error);
+            } finally {
+                session.endSession();
+            }
         }
     },
     // signUp: async (userName, email, password) => {

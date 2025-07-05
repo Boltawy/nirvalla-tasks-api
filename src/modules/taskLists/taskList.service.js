@@ -31,18 +31,23 @@ const taskListService = {
     deleteTaskListById: async (userId, taskListId) => { //TODOTEST
         const taskList = await findByIdAndVerifyUser(taskListModel, taskListId, userId);
         if (taskList.isDefault == true) throw new responseError(403, `The default 'Inbox' taskList can't be modified`);
-        const session = await mongo.startSession();
-        session.startTransaction();
-        try {
+        if (Boolean(process.env.dev)) { //PROD: disabling transactions in local
             await taskListModel.deleteOne({ _id: taskListId }, { session });
             await taskModel.deleteMany({ taskListId }, { session });
-            await session.commitTransaction();
-        } catch (error) {
-            await session.abortTransaction();
-            throw responseError(500, "Error deleting taskList", error);
-        }
-        finally {
-            session.endSession();
+        } else {
+            const session = await mongo.startSession();
+            session.startTransaction();
+            try {
+                await taskListModel.deleteOne({ _id: taskListId }, { session });
+                await taskModel.deleteMany({ taskListId }, { session });
+                await session.commitTransaction();
+            } catch (error) {
+                await session.abortTransaction();
+                throw responseError(500, "Error deleting taskList", error);
+            }
+            finally {
+                session.endSession();
+            }
         }
     },
 

@@ -50,17 +50,22 @@ const taskService = {
 
     deleteTaskById: async (userId, taskId) => { //TODOTEST
         await findByIdAndVerifyUser(taskModel, taskId, userId);
-        const session = await mongoose.startSession();
-        session.startTransaction();
-        try {
+        if (Boolean(process.env.dev)) { //PROD: disabling transactions in local
             await taskModel.deleteOne({ _id: taskId }, { session });
             await taskModel.deleteMany({ parentId: taskId }, { session });
-            await session.commitTransaction();
-        } catch (error) {
-            await session.abortTransaction();
-            throw responseError(500, "Error deleting task", error);
-        } finally {
-            session.endSession();
+        } else {
+            const session = await mongoose.startSession();
+            session.startTransaction();
+            try {
+                await taskModel.deleteOne({ _id: taskId }, { session });
+                await taskModel.deleteMany({ parentId: taskId }, { session });
+                await session.commitTransaction();
+            } catch (error) {
+                await session.abortTransaction();
+                throw responseError(500, "Error deleting task", error);
+            } finally {
+                session.endSession();
+            }
         }
     },
 

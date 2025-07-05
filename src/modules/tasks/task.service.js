@@ -16,9 +16,8 @@ const taskService = {
     createTask: async (userId, newTask) => {
         newTask.userId = userId;
         const { taskListId, taskListTitle, parentId } = newTask;
-        let fetchedTaskList
 
-        if (parentId) { //TODO check if parent task exists and of same user
+        if (parentId) { 
             const parentTask = await findByIdAndVerifyUser(taskModel, newTask.parentId, userId)
             newTask.taskListId = parentTask.taskListId
             return await safeCreate(taskModel, newTask);
@@ -28,8 +27,9 @@ const taskService = {
             await findByIdAndVerifyUser(taskListModel, taskListId, userId);
             return await safeCreate(taskModel, newTask);
         }
+        
         if (taskListTitle) { //Safe Find or create
-            fetchedTaskList = await safeFindOne(taskListModel, { title: taskListTitle, userId }, { errOnNotFound: false });
+            const fetchedTaskList = await safeFindOne(taskListModel, { title: taskListTitle, userId }, { errOnNotFound: false });
             if (!fetchedTaskList) {
                 fetchedTaskList = await safeCreate(taskListModel, { title: taskListTitle, userId });
             }
@@ -37,8 +37,8 @@ const taskService = {
             return await safeCreate(taskModel, newTask);
         }
 
-        fetchedTaskList = await safeFindOne(taskListModel, { userId, isDefault: true });
-        newTask.taskListId = fetchedTaskList._id;
+        const inboxTaskList = await safeFindOne(taskListModel, { userId, isDefault: true });
+        newTask.taskListId = inboxTaskList._id;
         return await safeCreate(taskModel, newTask);
     },
 

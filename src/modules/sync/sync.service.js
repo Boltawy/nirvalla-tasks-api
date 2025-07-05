@@ -17,7 +17,7 @@ const syncService = {
         })
         for (const task of tasks) {
             if (task.parentId) tasks.find((parentTask) => parentTask._id.toString() == task.parentId.toString()).subtasks.push(task);
-            taskLists.find((list) => list._id.toString() == task.taskListId.toString()).tasks.push(task);
+            else taskLists.find((list) => list._id.toString() == task.taskListId.toString()).tasks.push(task);
         }
         return taskLists;
     }

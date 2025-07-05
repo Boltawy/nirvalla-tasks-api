@@ -56,8 +56,8 @@ const taskService = {
     deleteTaskById: async (userId, taskId) => { //TODOTEST
         await findByIdAndVerifyUser(taskModel, taskId, userId);
         if (Boolean(process.env.dev)) { //PROD: disabling transactions in local
-            await taskModel.deleteOne({ _id: taskId }, { session });
-            await taskModel.deleteMany({ parentId: taskId }, { session });
+            await safeDeleteById(taskModel, taskId);
+            await safeDelete(taskModel, { parentId: taskId });
         } else {
             const session = await mongoose.startSession();
             session.startTransaction();

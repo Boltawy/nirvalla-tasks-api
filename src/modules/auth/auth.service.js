@@ -13,9 +13,8 @@ const authService = {
         if (user) throw new responseError(409, "A user already exists with given email")
         const hashedPassword = await bcrypt.hash(password, 8)
         if (Boolean(process.env.dev)) { //PROD: disabling transactions in local
-            const result = await userModel.create([{ userName, email, password: hashedPassword }]);
-            const { _id: userId } = result[0];
-            await taskListModel.create([{ userId, title: "Inbox", isDefault: true }]);
+            const { _id: userId } = await safeCreate(userModel, { userName, email, password: hashedPassword });
+            await safeCreate(taskListModel, { userId, title: "Inbox", isDefault: true })
         } else {
             const session = await mongoose.startSession();
             session.startTransaction();

@@ -32,8 +32,8 @@ const taskListService = {
         const taskList = await findByIdAndVerifyUser(taskListModel, taskListId, userId);
         if (taskList.isDefault == true) throw new responseError(403, `The default 'Inbox' taskList can't be modified`);
         if (Boolean(process.env.dev)) { //PROD: disabling transactions in local
-            await taskListModel.deleteOne({ _id: taskListId }, { session });
-            await taskModel.deleteMany({ taskListId }, { session });
+            await safeDeleteById(taskListModel, taskListId);
+            await safeDelete(taskModel, { taskListId });
         } else {
             const session = await mongo.startSession();
             session.startTransaction();

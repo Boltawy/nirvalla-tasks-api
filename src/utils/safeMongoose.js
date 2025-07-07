@@ -180,7 +180,7 @@ export const safeUpdateById = async (model, id, updateData, errMessage) => {
  * @param {Object} [options] - Options for the operation.
  * @param {boolean} [options.hardDelete=false] - Whether to perform a hard delete.
  * @param {boolean} [options.errOnNotFound=true] - Whether to throw an error if no documents are found.
- * @param {boolean} [options.addDeletedAt=false] - Whether to add a 'deletedAt' timestamp on soft delete.
+ * @param {boolean} [options.addDeletedAt=false] - Whether to add a 'deletedAt' timestamp or a 'isDeleted' flag on soft delete.
  * @param {string} [options.errMessage] - The error message to use if the operation fails.
  * @param {ClientSession} [options.session] - The session to use if you want to use a transaction.
  * @returns {Promise<mongoose.DeleteWriteOpResultObject> | Promise<mongoose.UpdateWriteOpResult>} The result of the operation.
@@ -240,11 +240,6 @@ export const safeDeleteById = async (model, id, options = {}) => { //TODOTEST
         throw new responseError(500, errMessage || `Error deleting ${modelName} from database`, error);
     }
 };
-
-// export const softDeleteById = async (model, id, errMessage) => { //Coupled with bussiness logic
-//     await safeUpdateById(model, id, { deletedAt: new Date() }, errMessage);
-// };
-
 
 
 

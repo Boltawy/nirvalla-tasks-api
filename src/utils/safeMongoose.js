@@ -1,4 +1,4 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose, { isValidObjectId } from "mongoose";
 import { responseError } from "./errorHandler.js";
 //TODO Options object for all functions
 //MIGHTDO: safeFindOrCreate, similar to Sequalize
@@ -46,7 +46,7 @@ export const safeFindOne = async (model, filter, options = {}) => {
 export const safeFindById = async (model, id, options = {}) => {
     const { errMessage, errOnNotFound = true, projection } = options;
     const { modelName } = model;
-    if (!mongoose.Types.ObjectId.isValid(id)) throw new responseError(400, `Invalid ID format for ${modelName}`);
+    if (!isValidObjectId(id)) throw new responseError(400, `Invalid ID format for ${modelName}`);
     let result;
     try {
         result = await model.findById(id, projection);
@@ -69,7 +69,7 @@ export const safeFindById = async (model, id, options = {}) => {
  */
 
 export const findByIdAndVerifyUser = async (model, itemId, userId) => { //Coupled with business logic
-    if (!mongoose.Types.ObjectId.isValid(userId)) throw new responseError(400, `Invalid ID format for user`); //* change to "owner" for the reusable package
+    if (!isValidObjectId(userId)) throw new responseError(400, `Invalid ID format for user`); //* change to "owner" for the reusable package
     const item = await safeFindById(model, itemId);
     if (item.userId != userId) throw new responseError(403, "Unauthorized: You don't have access to that resource");
     return item;
@@ -163,7 +163,7 @@ export const safeUpdate = async (model, filter, updateData, errMessage) => {
  */
 export const safeUpdateById = async (model, id, updateData, errMessage) => {
     const { modelName } = model;
-    if (!mongoose.Types.ObjectId.isValid(id)) throw new responseError(400, `Invalid ID format for ${modelName}`);
+    if (!isValidObjectId(id)) throw new responseError(400, `Invalid ID format for ${modelName}`);
     try {
         const result = await model.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
         if (!result) throw new responseError(404, `${modelName} not found`);
@@ -229,7 +229,7 @@ export const safeDeleteById = async (model, id, options = {}) => { //TODOTEST
     const { hardDelete = false, errOnNotFound = true, addDeletedAt = true, errMessage } = options;
     const { modelName } = model;
     let result;
-    if (!mongoose.Types.ObjectId.isValid(id)) throw new responseError(400, `Invalid ID format for ${modelName}`);
+    if (!isValidObjectId(id)) throw new responseError(400, `Invalid ID format for ${modelName}`);
     try {
         if (hardDelete) await model.findByIdAndDelete(id);
         else {

@@ -10,10 +10,9 @@ const syncController = {
     },
     syncToServer: async (req, res) => {
         const { body: { populatedLists }, userId } = req;
-        const { tasklists: sentTasklists, tasks: sentTasks } = await syncService.depopulateLists(populatedLists);
-        const tasks = await assignIds(sentTasks);
-        const taskLists = await assignIds(sentTasklists);
-        await syncService.forcePush(userId, taskLists, tasks); //TODO Implement a smarter sync algorithm
+        const lists = await syncService.generateMongoIds(populatedLists);
+        const { tasklists, tasks } = await syncService.depopulateLists(lists);
+        await syncService.forcePush(userId, tasklists, tasks); //TODO Implement a smarter sync algorithm
         // await syncService.InvalidateAndUpdate(sentTasklists, sentTasks);
         return successHandler(res, { message: "Sync to server successfully" })
     }

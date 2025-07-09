@@ -17,12 +17,36 @@ const utils = {
         };
         recurse(parentTasks);
         return result;
+    },
+    recursiveGenerateTaskId: (initialTasks) => {
+
     }
 }
 
 
 
 const syncService = {
+
+    generateMongoIds: async (populatedLists) => {
+        return populatedLists.map((list) => {
+            let newListId;
+            if (!mongoose.Types.ObjectId.isValid(list._id)) newListId = new mongoose.Types.ObjectId();
+            return {
+                ...list,
+                _id: newListId || list._id,
+                tasks: list.tasks.map((task) => {
+                    let newTaskId
+                    if (!mongoose.Types.ObjectId.isValid(list._id)) newTaskId = new mongoose.Types.ObjectId();
+                    return {
+                        ...task,
+                        _id: newTaskId || task._id,
+                        taskListId: newListId || list._id
+                    }
+                })
+            }
+        })
+    },
+
     populateLists: async (userId) => {
         const taskLists = await safeFind(taskListModel, { userId, deletedAt: null }, { sort: { createdAt: 1 }, projection: { __v: 0 }, lean: true });
         const tasks = await safeFind(taskModel, { userId, deletedAt: null, completedAt: null }, { sort: { createdAt: 1 }, projection: { __v: 0 }, lean: true });
@@ -57,12 +81,12 @@ const syncService = {
         return { tasklists, tasks }
     },
 
-    InvalidateAndUpdate: async (sentTasklists, sentTasks) => {
-        //STEP Fetch current tasks and tasklists
-        //STEP compare the size of tasks and lists, If changed then 
-        //STEP loop over the sent tasklists and verify it exists in db, If not, Add it
-        //STEP Check if and update the status of deletedAt for all tasks
-    },
+    // InvalidateAndUpdate: async (sentTasklists, sentTasks) => {
+    //     //STEP Fetch current tasks and tasklists
+    //     //STEP compare the size of tasks and lists, If changed then 
+    //     //STEP loop over the sent tasklists and verify it exists in db, If not, Add it
+    //     //STEP Check if and update the status of deletedAt for all tasks
+    // },
 
     forcePush: async (userId, sentTasklists, sentTasks) => { //! Completely overwrites user data
         if (Boolean(process.env.dev)) {

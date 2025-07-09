@@ -120,9 +120,13 @@ export const safeFind = async (model, filter, options = {}) => {
 export const safeCreate = async (model, data, options = {}) => {
     const { errMessage, session } = options;
     const { modelName } = model;
-    // const isArray = Array.isArray(data)
     try {
-        const result = await model.create(data, { session, ordered: true });
+        let result;
+        if (session) {
+            result = await model.create(data, { session, ordered: true });
+        } else {
+            result = await model.create(data);
+        }
         return result;
     } catch (error) {
         throw new responseError(500, errMessage || `Error creating ${modelName} in database`, error.message || error);

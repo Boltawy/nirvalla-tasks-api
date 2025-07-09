@@ -2,7 +2,7 @@ import { responseError } from "../../utils/errorHandler.js";
 import { safeCreate, safeDeleteById, safeFind, safeFindOne, safeUpdateById, findByIdAndVerifyUser, safeDelete } from "../../utils/safeMongoose.js";
 import taskListModel from "../../models/taskList.model.js";
 import taskModel from "../../models/task.model.js";
-import mongoose from "mongoose";
+import mongoose, { isValidObjectId } from "mongoose";
 
 
 const utils = {
@@ -18,8 +18,14 @@ const utils = {
         recurse(parentTasks);
         return result;
     },
-    recursiveGenerateTaskId: (initialTasks) => {
-
+    recursiveGenerateTaskId: (parentTaskId, subtasks) => {
+        return subtasks.map((task) => {
+            return {
+                ...task,
+                parentId: parentTaskId,
+                subtasks: (task.subtasks.length > 0 ? utils.recursiveGenerateTaskId(task._id, task.subtasks) : [])
+            }
+        })
     }
 }
 
@@ -27,21 +33,23 @@ const utils = {
 
 const syncService = {
 
-    generateMongoIds: async (populatedLists) => {
+    generateMongoIds: (populatedLists) => { //TODO handle subtasks recursively
         return populatedLists.map((list) => {
             let newListId;
-            if (!mongoose.Types.ObjectId.isValid(list._id)) newListId = new mongoose.Types.ObjectId();
+            if (!isValidObjectId(list._id)) newListId = new mongoose.Types.ObjectId();
             return {
                 ...list,
                 _id: newListId || list._id,
                 tasks: list.tasks.map((task) => {
                     let newTaskId
-                    if (!mongoose.Types.ObjectId.isValid(list._id)) newTaskId = new mongoose.Types.ObjectId();
-                    return {
+                    if (!isValidObjectId(task._id)) newTaskId = new mongoose.Types.ObjectId();
+                    let newTask = {
                         ...task,
                         _id: newTaskId || task._id,
-                        taskListId: newListId || list._id
+                        taskListId: newListId || list._id,
                     }
+                    if (task.subtasks.length > 0) newTask.subtasks = utils.recursiveGenerateTaskId(newTask._id, task.subtasks);
+                    return newTask
                 })
             }
         })
@@ -57,18 +65,14 @@ const syncService = {
             Object.assign(task, { subtasks: [] })
         })
         for (const task of tasks) {
-            if (task.parentId) tasks.find((parentTask) => parentTask._id.toString() == task.parentId.toString()).subtasks.push(task);
+            if (task.parentId) tasks.find((parentTask) => parentTask._id.toString() == task.parentId.toString()).subtasks?.push(task);
             else taskLists.find((list) => list._id.toString() == task.taskListId.toString()).tasks.push(task);
         }
         return taskLists;
     },
 
     depopulateLists: async (populatedLists) => {
-        let tasklists = structuredClone(populatedLists);
-        tasklists = tasklists.map((list) => {
-            delete list.tasks;
-            return list;
-        })
+        const tasklists = populatedLists.map(({ tasks, ...listWithoutTasks }) => listWithoutTasks); //nice pattern, destructure the object so you leave out what you don't need
 
         const parentTasks = [];
         for (const list of populatedLists) {
@@ -77,7 +81,6 @@ const syncService = {
             })
         }
         const tasks = utils.flattenTasks(parentTasks);
-        // console.log(tasklists)
         return { tasklists, tasks }
     },
 

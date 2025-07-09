@@ -1,6 +1,7 @@
 import syncService from "./sync.service.js";
 import successHandler from "../../utils/successHandler.js";
 import { assignIds } from "../../utils/utils.js";
+import mongoose, { isValidObjectId } from "mongoose";
 
 const syncController = {
     getPopulatedLists: async (req, res) => {
@@ -10,10 +11,9 @@ const syncController = {
     },
     syncToServer: async (req, res) => {
         const { body: { populatedLists }, userId } = req;
-        const lists = await syncService.generateMongoIds(populatedLists);
+        const lists = syncService.generateMongoIds(populatedLists);
         const { tasklists, tasks } = await syncService.depopulateLists(lists);
         await syncService.forcePush(userId, tasklists, tasks); //TODO Implement a smarter sync algorithm
-        // await syncService.InvalidateAndUpdate(sentTasklists, sentTasks);
         return successHandler(res, { message: "Sync to server successfully" })
     }
 }

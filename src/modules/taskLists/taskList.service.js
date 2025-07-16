@@ -1,6 +1,6 @@
 import { responseError } from "../../utils/errorHandler.js";
 import { safeCreate, safeDeleteById, safeFind, safeFindOne, safeUpdateById, findByIdAndVerifyUser } from "../../utils/safeMongoose.js";
-import taskListModel from "../../models/taskList.model.js";
+import tasklistModel from "../../models/tasklist.model.js";
 import taskModel from "../../models/task.model.js";
 import { mongo } from "mongoose";
 
@@ -10,40 +10,40 @@ import { mongo } from "mongoose";
 //* => Done.
 
 
-const taskListService = {
-    getTaskLists: async (userId) => {
-        return await safeFind(taskListModel, { userId }, { sort: { createdAt: 1 }, projection: { userId: 0, __v: 0 } });
+const tasklistService = {
+    getTasklists: async (userId) => {
+        return await safeFind(tasklistModel, { userId }, { sort: { createdAt: 1 }, projection: { userId: 0, __v: 0 } });
     },
-    createTaskList: async (userId, taskList) => {
-        taskList.userId = userId
-        const alreadyExists = await safeFindOne(taskListModel, { title: taskList.title, userId }, { errOnNotFound: false });
-        if (alreadyExists) throw new responseError(409, "TaskList with same name already exists");
-        return await safeCreate(taskListModel, taskList);
+    createTasklist: async (userId, tasklist) => {
+        tasklist.userId = userId
+        const alreadyExists = await safeFindOne(tasklistModel, { title: tasklist.title, userId }, { errOnNotFound: false });
+        if (alreadyExists) throw new responseError(409, "Tasklist with same name already exists");
+        return await safeCreate(tasklistModel, tasklist);
     },
-    getTaskListById: async (userId, taskListId) => {
-        return await findByIdAndVerifyUser(taskListModel, taskListId, userId);
+    getTasklistById: async (userId, tasklistId) => {
+        return await findByIdAndVerifyUser(tasklistModel, tasklistId, userId);
     },
-    updateTaskListById: async (userId, taskListId, newTaskList) => {
-        const taskList = await findByIdAndVerifyUser(taskListModel, taskListId, userId);
-        if (taskList.isDefault == true) throw new responseError(403, `The default 'Inbox' taskList can't be modified`);
-        return await safeUpdateById(taskListModel, taskListId, newTaskList);
+    updateTasklistById: async (userId, tasklistId, newTasklist) => {
+        const tasklist = await findByIdAndVerifyUser(tasklistModel, tasklistId, userId);
+        if (tasklist.isDefault == true) throw new responseError(403, `The default 'Inbox' tasklist can't be modified`);
+        return await safeUpdateById(tasklistModel, tasklistId, newTasklist);
     },
-    deleteTaskListById: async (userId, taskListId) => { //TODOTEST
-        const taskList = await findByIdAndVerifyUser(taskListModel, taskListId, userId);
-        if (taskList.isDefault == true) throw new responseError(403, `The default 'Inbox' taskList can't be modified`);
+    deleteTasklistById: async (userId, tasklistId) => { //TODOTEST
+        const tasklist = await findByIdAndVerifyUser(tasklistModel, tasklistId, userId);
+        if (tasklist.isDefault == true) throw new responseError(403, `The default 'Inbox' tasklist can't be modified`);
         if (Boolean(process.env.dev)) { //PROD: disabling transactions in local
-            await safeDeleteById(taskListModel, taskListId);
-            await safeDelete(taskModel, { taskListId });
+            await safeDeleteById(tasklistModel, tasklistId);
+            await safeDelete(taskModel, { tasklistId });
         } else {
             const session = await mongo.startSession();
             session.startTransaction();
             try {
-                await taskListModel.deleteOne({ _id: taskListId }, { session });
-                await taskModel.deleteMany({ taskListId }, { session });
+                await tasklistModel.deleteOne({ _id: tasklistId }, { session });
+                await taskModel.deleteMany({ tasklistId }, { session });
                 await session.commitTransaction();
             } catch (error) {
                 await session.abortTransaction();
-                throw responseError(500, "Error deleting taskList", error);
+                throw responseError(500, "Error deleting tasklist", error);
             }
             finally {
                 session.endSession();
@@ -51,18 +51,18 @@ const taskListService = {
         }
     },
 
-    getTasksByTaskListId: async (userId, taskListId) => {
-        await findByIdAndVerifyUser(taskListModel, taskListId, userId);
-        return await safeFind(taskModel, { taskListId, userId });
+    getTasksByTasklistId: async (userId, tasklistId) => {
+        await findByIdAndVerifyUser(tasklistModel, tasklistId, userId);
+        return await safeFind(taskModel, { tasklistId, userId });
     },
-    createTaskByTaskListId: async (userId, taskListId, newTask) => {
-        newTask.taskListId = taskListId;
+    createTaskByTasklistId: async (userId, tasklistId, newTask) => {
+        newTask.tasklistId = tasklistId;
         newTask.userId = userId;
-        await findByIdAndVerifyUser(taskListModel, taskListId, userId);
+        await findByIdAndVerifyUser(tasklistModel, tasklistId, userId);
         return await safeCreate(taskModel, newTask);
     },
 
 }
 
-export default taskListService
+export default tasklistService
 

@@ -1,7 +1,7 @@
 import taskModel from "../../models/task.model.js";
-import taskListModel from "../../models/taskList.model.js";
+import tasklistModel from "../../models/tasklist.model.js";
 import { findByIdAndVerifyUser, safeCreate, safeDelete, safeDeleteById, safeFind, safeFindById, safeFindOne, safeUpdateById } from "../../utils/safeMongoose.js";
-import { taskListSchema } from "../../middleware/validationSchemas.js";
+import { tasklistSchema } from "../../middleware/validationSchemas.js";
 import { responseError } from "../../utils/errorHandler.js";
 import mongoose from "mongoose";
 
@@ -15,30 +15,30 @@ const taskService = {
     },
     createTask: async (userId, newTask) => {
         newTask.userId = userId;
-        const { taskListId, taskListTitle, parentId } = newTask;
+        const { tasklistId, tasklistTitle, parentId } = newTask;
 
         if (parentId) {
             const parentTask = await findByIdAndVerifyUser(taskModel, newTask.parentId, userId)
-            newTask.taskListId = parentTask.taskListId
+            newTask.tasklistId = parentTask.tasklistId
             return await safeCreate(taskModel, newTask);
         };
 
-        if (taskListId) {
-            await findByIdAndVerifyUser(taskListModel, taskListId, userId);
+        if (tasklistId) {
+            await findByIdAndVerifyUser(tasklistModel, tasklistId, userId);
             return await safeCreate(taskModel, newTask);
         }
 
-        if (taskListTitle) { //Safe Find or create
-            const fetchedTaskList = await safeFindOne(taskListModel, { title: taskListTitle, userId }, { errOnNotFound: false });
-            if (!fetchedTaskList) {
-                fetchedTaskList = await safeCreate(taskListModel, { title: taskListTitle, userId });
+        if (tasklistTitle) { //Safe Find or create
+            const fetchedTasklist = await safeFindOne(tasklistModel, { title: tasklistTitle, userId }, { errOnNotFound: false });
+            if (!fetchedTasklist) {
+                fetchedTasklist = await safeCreate(tasklistModel, { title: tasklistTitle, userId });
             }
-            newTask.taskListId = fetchedTaskList._id;
+            newTask.tasklistId = fetchedTasklist._id;
             return await safeCreate(taskModel, newTask);
         }
 
-        const inboxTaskList = await safeFindOne(taskListModel, { userId, isDefault: true });
-        newTask.taskListId = inboxTaskList._id;
+        const inboxTasklist = await safeFindOne(tasklistModel, { userId, isDefault: true });
+        newTask.tasklistId = inboxTasklist._id;
         return await safeCreate(taskModel, newTask);
     },
 
@@ -48,7 +48,7 @@ const taskService = {
 
     updateTaskById: async (userId, taskId, updatedTask) => { //TODO Add validation for nested tasks
         await findByIdAndVerifyUser(taskModel, taskId, userId);
-        if (updatedTask.taskListId) await findByIdAndVerifyUser(taskListModel, updatedTask.taskListId, userId); //TODOTEST if trying to move to tasklist of another user
+        if (updatedTask.tasklistId) await findByIdAndVerifyUser(tasklistModel, updatedTask.tasklistId, userId); //TODOTEST if trying to move to tasklist of another user
         if (updatedTask.parentId) await findByIdAndVerifyUser(taskModel, updatedTask.parentId, userId); //TODOTEST if trying to append as subtask to a task of another user
         return await safeUpdateById(taskModel, taskId, updatedTask);
     },

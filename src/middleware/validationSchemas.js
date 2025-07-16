@@ -29,7 +29,7 @@ export const loginSchema = {
     })
 };
 
-export const taskListSchema = {
+export const tasklistSchema = {
     body: Joi.object({
         title: Joi.string()
             .max(40)
@@ -49,8 +49,8 @@ export const taskSchema = { //MIGHTDO Handle if nested tasks are sent
             .required(),
         description: Joi.string()
             .max(200),
-        taskListId: Joi.string(),
-        taskListTitle: Joi.string(),
+        tasklistId: Joi.string(),
+        tasklistTitle: Joi.string(),
         parentId: Joi.string(),
         subtasks: Joi.array().items(Joi.link().ref('taskSchema'))
     })
@@ -62,8 +62,8 @@ export const taskUpdateSchema = { //MIGHTDO extract common fields
             .max(40),
         description: Joi.string()
             .max(200),
-        taskListId: Joi.string(),
-        taskListTitle: Joi.string(),
+        tasklistId: Joi.string(),
+        tasklistTitle: Joi.string(),
         parentId: Joi.string(),
     })
 }

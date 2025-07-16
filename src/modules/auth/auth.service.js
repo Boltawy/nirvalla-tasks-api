@@ -3,7 +3,7 @@ import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import { responseError } from "../../utils/errorHandler.js";
 import { safeCreate, safeFindOne } from "../../utils/safeMongoose.js";
-import taskListModel from "../../models/taskList.model.js";
+import tasklistModel from "../../models/tasklist.model.js";
 import mongoose from "mongoose";
 
 
@@ -14,14 +14,14 @@ const authService = {
         const hashedPassword = await bcrypt.hash(password, 8)
         if (Boolean(process.env.dev)) { //PROD: disabling transactions in local
             const { _id: userId } = await safeCreate(userModel, { userName, email, password: hashedPassword });
-            await safeCreate(taskListModel, { userId, title: "Inbox", isDefault: true })
+            await safeCreate(tasklistModel, { userId, title: "Inbox", isDefault: true })
         } else {
             const session = await mongoose.startSession();
             session.startTransaction();
             try {
                 const result = await userModel.create([{ userName, email, password: hashedPassword }], { session });
                 const { _id: userId } = result[0];
-                await taskListModel.create([{ userId, title: "Inbox", isDefault: true }], { session });
+                await tasklistModel.create([{ userId, title: "Inbox", isDefault: true }], { session });
                 await session.commitTransaction();
             } catch (error) {
                 await session.abortTransaction();
@@ -38,7 +38,7 @@ const authService = {
     //     try {
     //         const result = await userModel.create([{ userName, email, password: hashedPassword }]);
     //         console.log(result[0])
-    //         await taskListModel.create([{ userId, title: "Inbox", isDefault: true }]);
+    //         await tasklistModel.create([{ userId, title: "Inbox", isDefault: true }]);
     //     } catch (error) {
     //         throw new responseError(500, "Error creating user", error);
     //     }
@@ -63,6 +63,10 @@ const authService = {
             { expiresIn: "365d" }
         )
         return { _id, userName, accessToken, refreshToken };
-    }
+    },
+
+    gmailLogin: async (loginEmail, loginPassword) => {
+        
+    },
 }
 export default authService

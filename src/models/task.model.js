@@ -3,7 +3,7 @@ import mongoose, { model, Schema } from "mongoose";
 const taskSchema = new Schema({
     title: { type: String, required: true, maxLength: 40 },
     description: { type: String, maxLength: 200 },
-    taskListId: { type: mongoose.Schema.Types.ObjectId, ref: 'TaskList', required: true, index: true },
+    tasklistId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tasklist', required: true, index: true },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     parentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Task', default: null },
     completedAt: { type: Date, default: null },

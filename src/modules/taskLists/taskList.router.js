@@ -1,22 +1,22 @@
     import { Router } from 'express'
-import taskListController from './taskList.controller.js';
+import tasklistController from './tasklist.controller.js';
 import { validate } from '../../middleware/validation.middleware.js';
 import { authenticate } from '../../middleware/auth.middleware.js';
-import { taskListSchema, taskSchema } from '../../middleware/validationSchemas.js';
+import { tasklistSchema, taskSchema } from '../../middleware/validationSchemas.js';
 
 
 
-const taskListRouter = Router();
+const tasklistRouter = Router();
 
-taskListRouter.route('/')
-    .get(authenticate, taskListController.getTaskLists)
-    .post(authenticate, validate(taskListSchema), taskListController.createTaskList);
-taskListRouter.route('/:taskListId')
-    .get(authenticate, taskListController.getTaskListById)
-    .patch(authenticate, validate(taskListSchema), taskListController.updateTaskListById)
-    .delete(authenticate, taskListController.deleteTaskListById);
-taskListRouter.route('/:taskListId/tasks')
-    .get(authenticate, taskListController.getTasksByTaskListId)
-    .post(authenticate, validate(taskSchema), taskListController.createTaskByTaskListId);
+tasklistRouter.route('/')
+    .get(authenticate, tasklistController.getTasklists)
+    .post(authenticate, validate(tasklistSchema), tasklistController.createTasklist);
+tasklistRouter.route('/:tasklistId')
+    .get(authenticate, tasklistController.getTasklistById)
+    .patch(authenticate, validate(tasklistSchema), tasklistController.updateTasklistById)
+    .delete(authenticate, tasklistController.deleteTasklistById);
+tasklistRouter.route('/:tasklistId/tasks')
+    .get(authenticate, tasklistController.getTasksByTasklistId)
+    .post(authenticate, validate(taskSchema), tasklistController.createTaskByTasklistId);
 
-export default taskListRouter
+export default tasklistRouter

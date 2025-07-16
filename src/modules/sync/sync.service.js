@@ -64,6 +64,8 @@ const syncService = {
         tasks.forEach((task) => {
             Object.assign(task, { subtasks: [] })
         })
+        console.log(tasklists)
+        console.log(tasks)
         for (const task of tasks) {
             if (task.parentId) tasks.find((parentTask) => parentTask._id.toString() == task.parentId.toString()).subtasks?.push(task);
             else tasklists.find((list) => list._id.toString() == task.tasklistId.toString()).tasks.push(task);

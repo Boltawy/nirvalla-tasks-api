@@ -2,7 +2,7 @@
 import { validate } from '../../middleware/validation.middleware.js';
 import { authenticate } from '../../middleware/auth.middleware.js';
 import { tasklistSchema, taskSchema } from '../../middleware/validationSchemas.js';
-import tasklistController from './taskList.controller.js';
+import tasklistController from './tasklist.controller.js';
 
 
 

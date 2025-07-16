@@ -3,7 +3,7 @@ configDotenv({ path: './config/dev.env' })
 import establishDBConnection from "./src/DB/db.connection.js"
 import express from 'express'
 import authRouter from './src/modules/auth/auth.router.js'
-import tasklistRouter from './src/modules/tasklists/tasklist.router.js'
+import tasklistRouter from './src/modules/tasklists/taskList.router.js'
 import taskRouter from './src/modules/tasks/task.router.js'
 import cors from 'cors'
 import syncRouter from './src/modules/sync/sync.router.js'

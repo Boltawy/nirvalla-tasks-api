@@ -29,7 +29,7 @@ const taskService = {
         }
 
         if (tasklistTitle) { //Safe Find or create
-            const fetchedTasklist = await safeFindOne(tasklistModel, { title: tasklistTitle, userId }, { errOnNotFound: false });
+            let fetchedTasklist = await safeFindOne(tasklistModel, { title: tasklistTitle, userId }, { errOnNotFound: false });
             if (!fetchedTasklist) {
                 fetchedTasklist = await safeCreate(tasklistModel, { title: tasklistTitle, userId });
             }
@@ -37,7 +37,10 @@ const taskService = {
             return await safeCreate(taskModel, newTask);
         }
 
-        const inboxTasklist = await safeFindOne(tasklistModel, { userId, isDefault: true });
+        let inboxTasklist = await safeFindOne(tasklistModel, { userId, isDefault: true, deletedAt: null }, { errOnNotFound: false });
+        if (!inboxTasklist) {
+            inboxTasklist = await safeCreate(tasklistModel, { title: "Inbox", userId, isDefault: true }); //TODOTEST
+        }
         newTask.tasklistId = inboxTasklist._id;
         return await safeCreate(taskModel, newTask);
     },
@@ -55,7 +58,7 @@ const taskService = {
 
     deleteTaskById: async (userId, taskId) => { //TODOTEST
         await findByIdAndVerifyUser(taskModel, taskId, userId);
-        if (Boolean(process.env.dev)) { //PROD: disabling transactions in local
+        if (Boolean(process.env.dev)) { // disabling transactions in local environment
             await safeDeleteById(taskModel, taskId);
             await safeDelete(taskModel, { parentId: taskId });
         } else {

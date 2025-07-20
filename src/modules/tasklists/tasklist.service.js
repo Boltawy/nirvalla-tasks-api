@@ -31,7 +31,7 @@ const tasklistService = {
     deleteTasklistById: async (userId, tasklistId) => { //TODOTEST
         const tasklist = await findByIdAndVerifyUser(tasklistModel, tasklistId, userId);
         if (tasklist.isDefault == true) throw new responseError(403, `The default 'Inbox' tasklist can't be modified`);
-        if (Boolean(process.env.dev)) { //PROD: disabling transactions in local
+        if (Boolean(process.env.dev)) { // disabling transactions in local environment
             await safeDeleteById(tasklistModel, tasklistId);
             await safeDelete(taskModel, { tasklistId });
         } else {

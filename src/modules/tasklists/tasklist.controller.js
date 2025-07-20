@@ -1,5 +1,4 @@
 import tasklistService from "./tasklist.service.js";
-import { asyncHandler } from "../../utils/errorHandler.js";
 import successHandler from "../../utils/successHandler.js";
 
 const tasklistController = {

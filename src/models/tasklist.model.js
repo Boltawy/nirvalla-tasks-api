@@ -4,6 +4,7 @@ const tasklistSchema = new Schema({
     title: { type: String, maxLength: 40, required: true },
     description: { type: String, maxLength: 200 },
     isDefault: { type: Boolean, default: false },
+    order: { type: Number, default: null },
     deletedAt: { type: Date, default: null },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
 }, { timestamps: true })

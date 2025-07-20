@@ -6,6 +6,7 @@ const taskSchema = new Schema({
     tasklistId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tasklist', required: true, index: true },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     parentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Task', default: null },
+    order: { type: Number, default: null },
     completedAt: { type: Date, default: null },
     deletedAt: { type: Date, default: null },
     // deadlineDate: { type: Date, default: null },

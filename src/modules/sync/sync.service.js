@@ -72,11 +72,17 @@ const syncService = {
     },
 
     depopulateLists: async (populatedLists) => {
-        const tasklists = populatedLists.map(({ tasks, ...listWithoutTasks }) => listWithoutTasks); //nice pattern, destructure the object so you leave out what you don't need
+        let listOrder = 0;
+        const tasklists = populatedLists.map(({ tasks, ...listWithoutTasks }) => { //nice pattern, destructure the object so you leave out what you don't need.
+            listWithoutTasks.order = listOrder++;
+            return listWithoutTasks
+        });
 
         const parentTasks = [];
         for (const list of populatedLists) {
+            let taskOrder = 0;
             list.tasks.forEach((task) => {
+                task.order = taskOrder++;
                 parentTasks.push(task);
             })
         }

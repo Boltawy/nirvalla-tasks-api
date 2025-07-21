@@ -1,5 +1,6 @@
-import mongoose from "mongoose";
-
+import mongoose, { connect } from "mongoose";
+import { configDotenv } from "dotenv"
+configDotenv({ path: './config/dev.env' })
 
 const establishDBConnection = () => {
     mongoose.connect(`${process.env.DBURL}/${process.env.DBNAME}`)

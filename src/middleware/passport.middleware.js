@@ -16,7 +16,7 @@ export const googleStrategy = passport.use(new GoogleStrategy({
 export const githubStrategy = passport.use(new GitHubStrategy({
     clientID: process.env.GITHUB_CLIENT_ID,
     clientSecret: process.env.GITHUB_CLIENT_SECRET,
-    callbackURL: "/api/v1/auth/github/redirect"
+    callbackURL: `${process.env.BACKEND_BASEURL}/api/v1/auth/github/redirect`
 }, (accessToken, refreshToken, user, done) => {
     done(null, user);
 }));

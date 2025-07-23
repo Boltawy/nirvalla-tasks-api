@@ -57,7 +57,7 @@ const syncService = {
 
     generatePopulatedLists: async (userId) => {
         const tasklists = await safeFind(tasklistModel, { userId, deletedAt: null }, { sort: { order: 1 }, projection: { __v: 0 }, lean: true });
-        const tasks = await safeFind(taskModel, { userId, deletedAt: null, completedAt: null }, { sort: { order: 1 }, projection: { __v: 0 }, lean: true });
+        const tasks = await safeFind(taskModel, { userId, deletedAt: null }, { sort: { order: 1 }, projection: { __v: 0 }, lean: true });
         tasklists.forEach((list) => {
             Object.assign(list, { tasks: [] })
         })

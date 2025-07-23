@@ -28,6 +28,9 @@ const authService = {
         if (user) throw new responseError(409, "A user already exists with given email")
         const hashedPassword = await bcrypt.hash(password, 8)
         await safeCreate(userModel, { userName, email, password: hashedPassword });
+        const newUser = await safeFindOne(userModel, { email })
+        const { accessToken, refreshToken } = localUtils.signJWT(newUser._id, newUser.userName);
+        return { _id: newUser._id, userName, accessToken, refreshToken };
     },
 
     login: async (loginEmail, loginPassword) => {

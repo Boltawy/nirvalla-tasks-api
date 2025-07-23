@@ -6,8 +6,8 @@ configDotenv({ path: './config/dev.env' })
 const authController = {
     signUp: async (req, res) => {
         const { userName, email, password } = req.body;
-        await authService.signUp(userName, email, password);
-        return successHandler(res, { message: "User created successfully" })
+        const loginData = await authService.signUp(userName, email, password);
+        return successHandler(res, { message: "User created successfully", ...loginData })
     },
     login: async (req, res) => {
         const { email: loginEmail, password: loginPassword } = req.body;

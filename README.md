@@ -1,6 +1,6 @@
   # Nirvalla Tasks API
 
-The official API for **Nirvalla Tasks** — a personal-first, open-source task management system.  
+The official API for **[Nirvalla Tasks](https://github.com/Boltawy/Nirvalla-Tasks)** — a personal-first, open-source task management system.  
 This API is currently a **work in progress (WIP)**, aiming to enable syncing and sharing tasks across devices and providers.
 
 ## 🚧 Status
@@ -9,7 +9,7 @@ This API is currently a **work in progress (WIP)**, aiming to enable syncing and
 
 ## 📦 Purpose
 
-- Serve as the backend for [Nirvalla Tasks](https://github.com/Boltawy/Nirvalla-Tasks).
+- Serve as the backend for ****.
 - Enable task sharing and syncing with other platforms.
 
 ## 📜 License
